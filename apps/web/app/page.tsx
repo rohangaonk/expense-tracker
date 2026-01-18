@@ -21,19 +21,6 @@ export default async function Home() {
 
   const { expenses, totalAmount, categoryBreakdown } = dashboardData;
 
-  // Get category colors
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      Food: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
-      Transport: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-      Shopping: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-      Bills: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-      Entertainment: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
-      Health: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-    };
-    return colors[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-black dark:to-gray-950 p-4 pb-24">
       <div className="max-w-4xl mx-auto space-y-6">
