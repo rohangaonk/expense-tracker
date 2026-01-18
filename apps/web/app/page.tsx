@@ -3,6 +3,7 @@ import { signout } from './auth/actions';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import ExpenseCard from './components/ExpenseCard';
 
 export default async function Home() {
   const supabase = createClient();
@@ -122,48 +123,11 @@ export default async function Home() {
               Recent Expenses
             </h2>
             {expenses.map((expense) => (
-              <div
+              <ExpenseCard
                 key={expense.id}
-                className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className={`text-xs font-medium px-2.5 py-1 rounded-full ${getCategoryColor(
-                          expense.category
-                        )}`}
-                      >
-                        {expense.category}
-                      </span>
-                      {expense.merchant && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          • {expense.merchant}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      {expense.description}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {new Date(expense.date).toLocaleDateString('en-IN', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                      {expense.time && ` • ${expense.time}`}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      ₹{Number(expense.amount).toLocaleString('en-IN', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </div>
+                expense={expense}
+                getCategoryColor={getCategoryColor}
+              />
             ))}
           </div>
         )}
