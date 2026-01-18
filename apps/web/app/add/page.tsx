@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { parseExpenseAction, saveExpenseAction, type ExpenseData } from '../actions/expense';
+import { addToSyncQueue } from '../../lib/offline/sync';
 import Link from 'next/link';
 import VoiceButton from '../components/VoiceButton';
 
@@ -45,7 +46,17 @@ export default function AddExpensePage() {
   const onSubmit = async (data: ExpenseData) => {
     setIsSaving(true);
     try {
-      await saveExpenseAction(data);
+      if (navigator.onLine) {
+        await saveExpenseAction(data);
+      } else {
+        await addToSyncQueue(data);
+        alert('You are offline. Expense saved locally and will sync when online.');
+         // Optional: Reset form here as if success
+      }
+      // Reset form on success (both online/offline cases, assuming addToSyncQueue doesn't throw easily)
+      setInputVal('');
+      setVoiceTranscript('');
+      // You might want to reset the form fields too if not redirected
     } catch (err) {
       console.error(err);
       alert('Failed to save expense');

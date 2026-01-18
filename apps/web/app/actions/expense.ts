@@ -55,6 +55,38 @@ export async function saveExpenseAction(data: ExpenseData) {
   redirect('/'); // Redirect to dashboard after save
 }
 
+// Version without redirect for background sync
+export async function saveExpenseForSync(data: ExpenseData) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { error } = await supabase.from('expenses').insert({
+    user_id: user.id,
+    amount: data.amount,
+    currency: data.currency,
+    category: data.category,
+    description: data.description,
+    merchant: data.merchant,
+    date: data.date,
+    time: data.time,
+    is_synced: true,
+  });
+
+  if (error) {
+    console.error('Error saving expense during sync:', error);
+    throw new Error('Failed to save expense: ' + error.message);
+  }
+
+  // Revalidate the home page cache
+  revalidatePath('/');
+  
+  return { success: true };
+}
+
 export async function deleteExpenseAction(id: string) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();

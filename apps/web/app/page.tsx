@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import ExpenseCard from './components/ExpenseCard';
+import PendingExpenses from './components/PendingExpenses';
 
 export default async function Home() {
   const supabase = createClient();
@@ -43,6 +44,9 @@ export default async function Home() {
             </form>
           </div>
         </header>
+
+        {/* Pending Sync Alert */}
+        <PendingExpenses />
 
         {/* Total Summary Card */}
         <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-6 shadow-lg">

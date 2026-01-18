@@ -9,5 +9,8 @@ export default withPWA({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+  disable: false, // Enable PWA in dev for testing offline support
+  fallbacks: {
+    document: '/offline', // Fallback for document requests (pages)
+  },
 })(nextConfig);

@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@repo/ui/components/ui/toaster";
 import InstallPrompt from "./components/InstallPrompt";
+import { OfflineSyncProvider } from '../components/OfflineSyncProvider';
+import Script from 'next/script';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -39,9 +41,29 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <InstallPrompt />
-        <Toaster />
+        <OfflineSyncProvider>
+          {children}
+          <InstallPrompt />
+          <Toaster />
+        </OfflineSyncProvider>
+        
+        {/* PWA Service Worker Registration */}
+        <Script id="pwa-register" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(
+                  function(registration) {
+                    console.log('[PWA] Service Worker registered:', registration.scope);
+                  },
+                  function(err) {
+                    console.error('[PWA] Service Worker registration failed:', err);
+                  }
+                );
+              });
+            }
+          `}
+        </Script>
       </body>
     </html>
   );
