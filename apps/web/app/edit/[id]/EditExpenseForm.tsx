@@ -15,13 +15,15 @@ interface EditExpenseFormProps {
     merchant: string | null;
     date: string;
     time: string | null;
+    is_recurring: boolean;
+    recurrence_period: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
   };
 }
 
 export default function EditExpenseForm({ expense }: EditExpenseFormProps) {
   const [isSaving, setIsSaving] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ExpenseData>({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<ExpenseData>({
     defaultValues: {
       amount: expense.amount,
       currency: expense.currency,
@@ -30,8 +32,12 @@ export default function EditExpenseForm({ expense }: EditExpenseFormProps) {
       merchant: expense.merchant,
       date: expense.date,
       time: expense.time,
+      is_recurring: expense.is_recurring,
+      recurrence_period: expense.recurrence_period,
     },
   });
+
+  const isRecurring = watch('is_recurring');
 
   const onSubmit = async (data: ExpenseData) => {
     setIsSaving(true);
@@ -108,6 +114,39 @@ export default function EditExpenseForm({ expense }: EditExpenseFormProps) {
               />
             </div>
           </div>
+
+          {/* Recurring Expense Toggle */}
+          <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+            <input
+              type="checkbox"
+              id="is_recurring"
+              {...register('is_recurring')}
+              className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="is_recurring" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+              <span className="text-lg">🔄</span>
+              Mark as recurring expense
+            </label>
+          </div>
+
+          {/* Recurrence Period (shown only if recurring is checked) */}
+          {isRecurring && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Recurrence Period
+              </label>
+              <select
+                {...register('recurrence_period')}
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Select period...</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+          )}
 
           <button
             type="submit"

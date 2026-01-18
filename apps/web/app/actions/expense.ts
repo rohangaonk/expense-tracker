@@ -25,6 +25,8 @@ export type ExpenseData = {
   merchant?: string | null;
   date: string;
   time?: string | null;
+  is_recurring?: boolean;
+  recurrence_period?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
 };
 
 export async function saveExpenseAction(data: ExpenseData) {
@@ -45,6 +47,8 @@ export async function saveExpenseAction(data: ExpenseData) {
     date: data.date,
     time: data.time,
     is_synced: true, // Assuming online save for now
+    is_recurring: data.is_recurring || false,
+    recurrence_period: data.recurrence_period || null,
   });
 
   if (error) {
@@ -74,6 +78,8 @@ export async function saveExpenseForSync(data: ExpenseData) {
     date: data.date,
     time: data.time,
     is_synced: true,
+    is_recurring: data.is_recurring || false,
+    recurrence_period: data.recurrence_period || null,
   });
 
   if (error) {
@@ -148,6 +154,8 @@ export async function updateExpenseAction(id: string, data: ExpenseData) {
       merchant: data.merchant,
       date: data.date,
       time: data.time,
+      is_recurring: data.is_recurring || false,
+      recurrence_period: data.recurrence_period || null,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id);

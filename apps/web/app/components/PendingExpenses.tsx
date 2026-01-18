@@ -4,10 +4,12 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../lib/offline/db';
 import { processSyncQueue } from '../../lib/offline/sync';
 import { useState } from 'react';
+import { useToast } from '../../components/ToastProvider';
 
 export default function PendingExpenses() {
   const pendingCount = useLiveQuery(() => db.syncQueue.where('type').equals('ADD_EXPENSE').count(), [], 0);
   const [isSyncing, setIsSyncing] = useState(false);
+  const { showSuccess, showError } = useToast();
 
   const handleManualSync = async () => {
     console.log('[PendingExpenses] Manual sync triggered');
@@ -20,15 +22,15 @@ export default function PendingExpenses() {
       const failCount = results?.filter(r => r.status === 'error').length || 0;
       
       if (successCount > 0) {
-        alert(`✅ Successfully synced ${successCount} expense(s)!`);
+        showSuccess(`Successfully synced ${successCount} expense(s)!`);
         window.location.reload(); // Reload to show updated expenses
       }
       if (failCount > 0) {
-        alert(`❌ Failed to sync ${failCount} expense(s). Check console for details.`);
+        showError(`Failed to sync ${failCount} expense(s). Check console for details.`);
       }
     } catch (error) {
       console.error('[PendingExpenses] Sync error:', error);
-      alert('❌ Sync failed: ' + (error as Error).message);
+      showError('Sync failed: ' + (error as Error).message);
     } finally {
       setIsSyncing(false);
     }

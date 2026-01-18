@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { deleteExpenseAction } from '../actions/expense';
 import { useState } from 'react';
+import { useConfirmDialog } from '../../components/ConfirmDialogProvider';
+import { useToast } from '../../components/ToastProvider';
 
 interface ExpenseCardProps {
   expense: {
@@ -14,11 +16,15 @@ interface ExpenseCardProps {
     merchant: string | null;
     date: string;
     time: string | null;
+    is_recurring: boolean;
+    recurrence_period: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
   };
 }
 
 export default function ExpenseCard({ expense }: ExpenseCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const { confirm } = useConfirmDialog();
+  const { showError } = useToast();
 
   // Category color mapping
   const getCategoryColor = (category: string) => {
@@ -34,7 +40,15 @@ export default function ExpenseCard({ expense }: ExpenseCardProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this expense?')) {
+    const confirmed = await confirm({
+      title: 'Delete Expense?',
+      message: 'Are you sure you want to delete this expense? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmVariant: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -43,33 +57,38 @@ export default function ExpenseCard({ expense }: ExpenseCardProps) {
       await deleteExpenseAction(expense.id);
     } catch (err) {
       console.error(err);
-      alert('Failed to delete expense');
+      showError('Failed to delete expense');
       setIsDeleting(false);
     }
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between gap-3">
+    <div className="bg-white dark:bg-gray-900 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
+          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
             <span
-              className={`text-xs font-medium px-2.5 py-1 rounded-full ${getCategoryColor(
+              className={`text-xs font-medium px-2 py-0.5 rounded-full ${getCategoryColor(
                 expense.category
               )}`}
             >
               {expense.category}
             </span>
+            {expense.is_recurring && (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 flex items-center gap-1">
+                🔄 {expense.recurrence_period}
+              </span>
+            )}
             {expense.merchant && (
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 • {expense.merchant}
               </span>
             )}
           </div>
-          <p className="text-gray-900 dark:text-white font-medium truncate">
+          <p className="text-sm text-gray-900 dark:text-white font-medium truncate">
             {expense.description}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             {new Date(expense.date).toLocaleDateString('en-IN', {
               year: 'numeric',
               month: 'short',
@@ -78,19 +97,18 @@ export default function ExpenseCard({ expense }: ExpenseCardProps) {
             {expense.time && ` • ${expense.time}`}
           </p>
         </div>
-        <div className="flex items-start gap-2">
+        <div className="flex items-start gap-1.5">
           <div className="text-right">
-            <p className="text-lg font-bold text-gray-900 dark:text-white whitespace-nowrap">
+            <p className="text-base font-bold text-gray-900 dark:text-white whitespace-nowrap">
               ₹{Number(expense.amount).toLocaleString('en-IN', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
+                maximumFractionDigits: 0,
               })}
             </p>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-0.5">
             <Link
               href={`/edit/${expense.id}`}
-              className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
               title="Edit expense"
             >
               <svg
@@ -99,7 +117,7 @@ export default function ExpenseCard({ expense }: ExpenseCardProps) {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-5 h-5"
+                className="w-4 h-4"
               >
                 <path
                   strokeLinecap="round"
@@ -111,7 +129,7 @@ export default function ExpenseCard({ expense }: ExpenseCardProps) {
             <button
               onClick={handleDelete}
               disabled={isDeleting}
-              className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+              className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
               title="Delete expense"
             >
               <svg
@@ -120,7 +138,7 @@ export default function ExpenseCard({ expense }: ExpenseCardProps) {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-5 h-5"
+                className="w-4 h-4"
               >
                 <path
                   strokeLinecap="round"

@@ -6,21 +6,25 @@ import { parseExpenseAction, saveExpenseAction, type ExpenseData } from '../acti
 import { addToSyncQueue } from '../../lib/offline/sync';
 import Link from 'next/link';
 import VoiceButton from '../components/VoiceButton';
+import { useToast } from '../../components/ToastProvider';
 
 export default function AddExpensePage() {
   const [isParsing, setIsParsing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const [voiceTranscript, setVoiceTranscript] = useState('');
+  const { showSuccess, showInfo } = useToast();
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<ExpenseData>({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ExpenseData>({
     defaultValues: {
       currency: 'INR',
       date: new Date().toISOString().split('T')[0],
+      is_recurring: false,
     },
   });
 
   const [inputVal, setInputVal] = useState('');
+  const isRecurring = watch('is_recurring');
 
   const handleParse = useCallback(async () => {
     if (!inputVal.trim()) return;
@@ -50,7 +54,7 @@ export default function AddExpensePage() {
         await saveExpenseAction(data);
       } else {
         await addToSyncQueue(data);
-        alert('You are offline. Expense saved locally and will sync when online.');
+        showInfo('You are offline. Expense saved locally and will sync when online.');
          // Optional: Reset form here as if success
       }
       // Reset form on success (both online/offline cases, assuming addToSyncQueue doesn't throw easily)
@@ -186,6 +190,39 @@ export default function AddExpensePage() {
                 />
              </div>
           </div>
+
+          {/* Recurring Expense Toggle */}
+          <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+            <input
+              type="checkbox"
+              id="is_recurring"
+              {...register('is_recurring')}
+              className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="is_recurring" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+              <span className="text-lg">🔄</span>
+              Mark as recurring expense
+            </label>
+          </div>
+
+          {/* Recurrence Period (shown only if recurring is checked) */}
+          {isRecurring && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Recurrence Period
+              </label>
+              <select
+                {...register('recurrence_period')}
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Select period...</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+          )}
 
           <button
             type="submit"

@@ -12,12 +12,17 @@ export interface Expense {
   date: string;
   time: string | null;
   created_at: string;
+  is_recurring: boolean;
+  recurrence_period: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
 }
 
 export interface DashboardData {
   expenses: Expense[];
   totalAmount: number;
+  recurringTotal: number;
+  nonRecurringTotal: number;
   categoryBreakdown: Record<string, number>;
+  expensesByCategory: Record<string, Expense[]>;
 }
 
 export async function getDashboardData(): Promise<DashboardData | null> {
@@ -40,18 +45,34 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     throw new Error('Failed to fetch expenses');
   }
 
-  // Calculate total and category breakdown
+  // Calculate totals
   const totalAmount = expenses?.reduce((sum, exp) => sum + Number(exp.amount), 0) || 0;
+  const recurringTotal = expenses?.filter(e => e.is_recurring).reduce((sum, exp) => sum + Number(exp.amount), 0) || 0;
+  const nonRecurringTotal = expenses?.filter(e => !e.is_recurring).reduce((sum, exp) => sum + Number(exp.amount), 0) || 0;
+  
+  // Category breakdown
   const categoryBreakdown: Record<string, number> = {};
-
   expenses?.forEach((exp) => {
     const category = exp.category;
     categoryBreakdown[category] = (categoryBreakdown[category] || 0) + Number(exp.amount);
   });
 
+  // Group expenses by category
+  const expensesByCategory: Record<string, Expense[]> = {};
+  expenses?.forEach((exp) => {
+    const category = exp.category;
+    if (!expensesByCategory[category]) {
+      expensesByCategory[category] = [];
+    }
+    expensesByCategory[category].push(exp);
+  });
+
   return {
     expenses: expenses || [],
     totalAmount,
+    recurringTotal,
+    nonRecurringTotal,
     categoryBreakdown,
+    expensesByCategory,
   };
 }

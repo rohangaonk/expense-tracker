@@ -4,6 +4,8 @@ import "./globals.css";
 import { Toaster } from "@repo/ui/components/ui/toaster";
 import InstallPrompt from "./components/InstallPrompt";
 import { OfflineSyncProvider } from '../components/OfflineSyncProvider';
+import { ToastProvider } from '../components/ToastProvider';
+import { ConfirmDialogProvider } from '../components/ConfirmDialogProvider';
 import Script from 'next/script';
 
 const geistSans = localFont({
@@ -41,11 +43,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <OfflineSyncProvider>
-          {children}
-          <InstallPrompt />
-          <Toaster />
-        </OfflineSyncProvider>
+        <ToastProvider>
+          <ConfirmDialogProvider>
+            <OfflineSyncProvider>
+              {children}
+              <InstallPrompt />
+              <Toaster />
+            </OfflineSyncProvider>
+          </ConfirmDialogProvider>
+        </ToastProvider>
         
         {/* PWA Service Worker Registration */}
         <Script id="pwa-register" strategy="afterInteractive">

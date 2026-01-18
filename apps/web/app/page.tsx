@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import ExpenseCard from './components/ExpenseCard';
 import PendingExpenses from './components/PendingExpenses';
+import SummaryCards from './components/SummaryCards';
+import CategorySection from './components/CategorySection';
 
 export default async function Home() {
   const supabase = createClient();
@@ -20,7 +22,10 @@ export default async function Home() {
     redirect('/login');
   }
 
-  const { expenses, totalAmount, categoryBreakdown } = dashboardData;
+  const { expenses, totalAmount, recurringTotal, nonRecurringTotal, expensesByCategory } = dashboardData;
+
+  const recurringCount = expenses.filter(e => e.is_recurring).length;
+  const nonRecurringCount = expenses.filter(e => !e.is_recurring).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-black dark:to-gray-950 p-4 pb-24">
@@ -48,23 +53,14 @@ export default async function Home() {
         {/* Pending Sync Alert */}
         <PendingExpenses />
 
-        {/* Total Summary Card */}
-        <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-6 shadow-lg">
-          <p className="text-blue-100 text-sm font-medium mb-1">Total Expenses</p>
-          <p className="text-white text-4xl font-bold">
-            ₹{totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </p>
-          <div className="mt-4 flex gap-2 flex-wrap">
-            {Object.entries(categoryBreakdown).slice(0, 3).map(([category, amount]) => (
-              <div key={category} className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5">
-                <p className="text-xs text-white/80">{category}</p>
-                <p className="text-sm font-semibold text-white">
-                  ₹{Number(amount).toLocaleString('en-IN')}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Summary Cards */}
+        <SummaryCards
+          recurring={recurringTotal}
+          nonRecurring={nonRecurringTotal}
+          total={totalAmount}
+          recurringCount={recurringCount}
+          nonRecurringCount={nonRecurringCount}
+        />
 
         {/* Expenses List */}
         {expenses.length === 0 ? (
@@ -109,14 +105,15 @@ export default async function Home() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white px-1">
-              Recent Expenses
+          <div className="space-y-2">
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Expenses by Category
             </h2>
-            {expenses.map((expense) => (
-              <ExpenseCard
-                key={expense.id}
-                expense={expense}
+            {Object.entries(expensesByCategory).map(([category, categoryExpenses]) => (
+              <CategorySection
+                key={category}
+                category={category}
+                expenses={categoryExpenses}
               />
             ))}
           </div>

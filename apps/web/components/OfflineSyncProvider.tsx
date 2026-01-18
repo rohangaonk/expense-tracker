@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { processSyncQueue } from '../lib/offline/sync';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../lib/offline/db';
+import { useToast } from './ToastProvider';
 
 interface OfflineSyncContextType {
   isOnline: boolean;
@@ -23,6 +24,7 @@ export function OfflineSyncProvider({ children }: { children: React.ReactNode })
   const [isOnline, setIsOnline] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const pendingCount = useLiveQuery(() => db.syncQueue.count(), [], 0);
+  const { showSuccess, showError } = useToast();
 
   useEffect(() => {
     // Initial online/offline state check
@@ -65,11 +67,11 @@ export function OfflineSyncProvider({ children }: { children: React.ReactNode })
            console.log(`[OfflineSyncProvider] Success: ${successCount}, Failed: ${failCount}`);
            
            if (successCount > 0) {
-               alert(`✅ Successfully synced ${successCount} expense(s)!`);
+               showSuccess(`Successfully synced ${successCount} expense(s)!`);
                window.location.reload(); // Reload to show synced expenses
            }
            if (failCount > 0) {
-               alert(`❌ Failed to sync ${failCount} expense(s). Check console for details.`);
+               showError(`Failed to sync ${failCount} expense(s). Check console for details.`);
            }
          } else {
            console.log('[OfflineSyncProvider] No items were synced');
@@ -77,7 +79,7 @@ export function OfflineSyncProvider({ children }: { children: React.ReactNode })
       })
       .catch(err => {
         console.error('[OfflineSyncProvider] Sync error:', err);
-        alert('❌ Sync failed: ' + err.message);
+        showError('Sync failed: ' + err.message);
       })
       .finally(() => {
         console.log('[OfflineSyncProvider] Sync process finished');

@@ -15,11 +15,17 @@ export interface ParsedExpense {
 }
 
 export async function parseExpense(text: string): Promise<ParsedExpense> {
+  const categories = [
+    'Food & Dining', 'Groceries', 'Transport', 'Shopping', 'Electronics',
+    'Bills & Utilities', 'Entertainment', 'Health & Fitness', 'Education',
+    'Travel', 'Personal Care', 'Home & Garden', 'Gifts & Donations', 'Insurance', 'Other'
+  ];
+
   const prompt = `
     Extract the following expense details from the user's input:
     - Amount (number)
     - Currency (always INR)
-    - Category (e.g., Food, Transport, Shopping, Bills, etc.)
+    - Category (MUST be one of: ${categories.join(', ')})
     - Description (brief summary)
     - Merchant (if applicable)
     - Date (YYYY-MM-DD, assume current year if not specified. Today is ${new Date().toISOString().split('T')[0]})
@@ -28,6 +34,7 @@ export async function parseExpense(text: string): Promise<ParsedExpense> {
     User Input: "${text}"
 
     Return ONLY a valid JSON object with keys: amount, currency, category, description, merchant, date, time.
+    IMPORTANT: The category MUST be exactly one of the predefined categories listed above.
     Do not add markdown formatting.
   `;
 
