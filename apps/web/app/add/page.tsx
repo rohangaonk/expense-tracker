@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { parseExpenseAction, saveExpenseAction, type ExpenseData } from '../actions/expense';
 import Link from 'next/link';
+import VoiceButton from '../components/VoiceButton';
 
 export default function AddExpensePage() {
   const [isParsing, setIsParsing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [voiceTranscript, setVoiceTranscript] = useState('');
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<ExpenseData>({
     defaultValues: {
@@ -52,6 +54,25 @@ export default function AddExpensePage() {
     }
   };
 
+  // Handle voice transcript updates
+  const handleTranscriptChange = (transcript: string) => {
+    setInputVal(transcript);
+  };
+
+  // Auto-parse when voice recording completes
+  const handleRecordingComplete = (transcript: string) => {
+    setVoiceTranscript(transcript);
+    setInputVal(transcript);
+  };
+
+  // Trigger parsing when voice transcript is set
+  useEffect(() => {
+    if (voiceTranscript && voiceTranscript.trim()) {
+      handleParse();
+      setVoiceTranscript(''); // Reset to avoid re-parsing
+    }
+  }, [voiceTranscript]);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black p-4">
       <div className="max-w-md mx-auto space-y-6">
@@ -68,28 +89,34 @@ export default function AddExpensePage() {
           </label>
           <div className="relative">
             <textarea
-              className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all shadow-sm"
+              className="w-full p-3 pr-24 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all shadow-sm"
               rows={3}
               placeholder="e.g., Spent 150 on coffee at Starbucks"
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
             />
-            <button
-              onClick={handleParse}
-              disabled={isParsing || !inputVal}
-              className="absolute bottom-3 right-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg disabled:opacity-50 transition-colors shadow-sm flex items-center gap-1"
-            >
-              {isParsing ? (
-                <span>Parsing...</span>
-              ) : (
-                <>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
-                    <path d="M15.98 1.804a1 1 0 0 0-1.215-.04l-7.276 5.25a1 1 0 0 0-.295 1.054l1.396 4.312-3.805 1.902a1 1 0 0 0-.48 1.137l.462 2.312a1 1 0 0 0 .98.804h.023l2.355-.392a1 1 0 0 0 .762-.777l.951-4.755 3.996-1.998a1 1 0 0 0 .5-1.528l-1.026-4.502 3.016-2.176a1 1 0 0 0-.154-1.65ZM5.286 9.42l3.498-2.527.702 3.067-4.2 .92 3.23-3.086Z" />
-                  </svg>
-                  Magic Parse
-                </>
-              )}
-            </button>
+            <div className="absolute bottom-3 right-3 flex items-center gap-2">
+              <VoiceButton
+                onTranscriptChange={handleTranscriptChange}
+                onRecordingComplete={handleRecordingComplete}
+              />
+              <button
+                onClick={handleParse}
+                disabled={isParsing || !inputVal}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg disabled:opacity-50 transition-colors shadow-sm flex items-center gap-1"
+              >
+                {isParsing ? (
+                  <span>Parsing...</span>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                      <path d="M15.98 1.804a1 1 0 0 0-1.215-.04l-7.276 5.25a1 1 0 0 0-.295 1.054l1.396 4.312-3.805 1.902a1 1 0 0 0-.48 1.137l.462 2.312a1 1 0 0 0 .98.804h.023l2.355-.392a1 1 0 0 0 .762-.777l.951-4.755 3.996-1.998a1 1 0 0 0 .5-1.528l-1.026-4.502 3.016-2.176a1 1 0 0 0-.154-1.65ZM5.286 9.42l3.498-2.527.702 3.067-4.2 .92 3.23-3.086Z" />
+                    </svg>
+                    Magic Parse
+                  </>
+                )}
+              </button>
+            </div>
           </div>
           {parseError && <p className="text-red-500 text-xs">{parseError}</p>}
         </section>
