@@ -1,0 +1,12 @@
+{
+  "buildCommand": "cd ../.. && pnpm install && pnpm build --filter=@repo/web",
+  "outputDirectory": ".next",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
+}
