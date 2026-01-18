@@ -126,7 +126,6 @@ export default async function Home() {
               <ExpenseCard
                 key={expense.id}
                 expense={expense}
-                getCategoryColor={getCategoryColor}
               />
             ))}
           </div>

@@ -15,11 +15,23 @@ interface ExpenseCardProps {
     date: string;
     time: string | null;
   };
-  getCategoryColor: (category: string) => string;
 }
 
-export default function ExpenseCard({ expense, getCategoryColor }: ExpenseCardProps) {
+export default function ExpenseCard({ expense }: ExpenseCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Category color mapping
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      Food: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+      Transport: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      Shopping: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+      Bills: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+      Entertainment: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
+      Health: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    };
+    return colors[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+  };
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this expense?')) {
