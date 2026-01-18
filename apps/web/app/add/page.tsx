@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { parseExpenseAction, saveExpenseAction, type ExpenseData } from '../actions/expense';
 import Link from 'next/link';
@@ -21,7 +21,7 @@ export default function AddExpensePage() {
 
   const [inputVal, setInputVal] = useState('');
 
-  const handleParse = async () => {
+  const handleParse = useCallback(async () => {
     if (!inputVal.trim()) return;
     setIsParsing(true);
     setParseError(null);
@@ -40,7 +40,7 @@ export default function AddExpensePage() {
     } finally {
       setIsParsing(false);
     }
-  };
+  }, [inputVal, setValue]);
 
   const onSubmit = async (data: ExpenseData) => {
     setIsSaving(true);
@@ -71,7 +71,7 @@ export default function AddExpensePage() {
       handleParse();
       setVoiceTranscript(''); // Reset to avoid re-parsing
     }
-  }, [voiceTranscript]);
+  }, [voiceTranscript, handleParse]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black p-4">
