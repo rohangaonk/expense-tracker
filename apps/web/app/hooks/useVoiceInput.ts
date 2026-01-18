@@ -35,9 +35,11 @@ export function useVoiceInput(): VoiceInputState & VoiceInputControls {
       
       if (SpeechRecognitionAPI) {
         const recognition = new SpeechRecognitionAPI();
-        recognition.continuous = true;
+        // Continuous mode is often unstable on mobile, so we disable it for better compatibility
+        recognition.continuous = false;
         recognition.interimResults = true;
-        recognition.lang = 'en-IN'; // English (India) for better INR recognition
+        // Use device language or fallback to en-IN
+        recognition.lang = window.navigator.language || 'en-IN';
         recognition.maxAlternatives = 1;
         
         recognitionRef.current = recognition;
@@ -92,7 +94,7 @@ export function useVoiceInput(): VoiceInputState & VoiceInputControls {
         'no-speech': 'No speech detected. Please try again.',
         'audio-capture': 'Microphone not found. Please check your device.',
         'not-allowed': 'Microphone access denied. Please enable it in settings.',
-        'network': 'Network error. Please check your connection.',
+        'network': 'Network error. Ensure you are online and using HTTPS (required for mobile).',
         'aborted': 'Recording was stopped.',
       };
       
