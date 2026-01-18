@@ -156,8 +156,7 @@ export default async function Home() {
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {expense.currency === 'INR' ? '₹' : expense.currency}{' '}
-                      {Number(expense.amount).toLocaleString('en-IN', {
+                      ₹{Number(expense.amount).toLocaleString('en-IN', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}

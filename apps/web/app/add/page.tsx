@@ -95,30 +95,16 @@ export default function AddExpensePage() {
         </section>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Amount</label>
-              <input
-                type="number"
-                step="0.01"
-                {...register('amount', { required: true, valueAsNumber: true })}
-                className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                placeholder="0.00"
-              />
-              {errors.amount && <span className="text-red-500 text-xs">Required</span>}
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Currency</label>
-              <select
-                {...register('currency')}
-                className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              >
-                <option value="INR">INR</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-              </select>
-            </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Amount (₹)</label>
+            <input
+              type="number"
+              step="0.01"
+              {...register('amount', { required: true, valueAsNumber: true })}
+              className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="0.00"
+            />
+            {errors.amount && <span className="text-red-500 text-xs">Required</span>}
           </div>
 
           <div className="space-y-1">

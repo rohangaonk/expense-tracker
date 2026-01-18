@@ -18,7 +18,7 @@ export async function parseExpense(text: string): Promise<ParsedExpense> {
   const prompt = `
     Extract the following expense details from the user's input:
     - Amount (number)
-    - Currency (in ISO format, default to INR if inferred or not specified but user implies local currency. If explicitly USD/EUR etc, use that)
+    - Currency (always INR)
     - Category (e.g., Food, Transport, Shopping, Bills, etc.)
     - Description (brief summary)
     - Merchant (if applicable)
