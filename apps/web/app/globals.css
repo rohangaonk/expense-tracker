@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "@repo/ui/globals.css";
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
