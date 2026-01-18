@@ -25,7 +25,7 @@ export interface DashboardData {
   expensesByCategory: Record<string, Expense[]>;
 }
 
-export async function getDashboardData(): Promise<DashboardData | null> {
+export async function getDashboardData(startDate?: string, endDate?: string): Promise<DashboardData | null> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -33,10 +33,20 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     return null;
   }
 
-  const { data: expenses, error } = await supabase
+  let query = supabase
     .from('expenses')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', user.id);
+
+  // Apply date range filter if provided
+  if (startDate) {
+    query = query.gte('date', startDate);
+  }
+  if (endDate) {
+    query = query.lte('date', endDate);
+  }
+
+  const { data: expenses, error } = await query
     .order('date', { ascending: false })
     .order('created_at', { ascending: false });
 

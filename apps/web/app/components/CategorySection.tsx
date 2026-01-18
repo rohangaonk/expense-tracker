@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { getCategoryDetails, getCategoryColorClasses } from '@/lib/categories';
+import { getCategoryDetails } from '@/lib/categories';
 import { deleteExpenseAction } from '../actions/expense';
 import { useConfirmDialog } from '@/components/ConfirmDialogProvider';
 import { useToast } from '@/components/ToastProvider';
@@ -76,7 +76,6 @@ export default function CategorySection({ category, expenses, isExpanded = true 
 
 // Compact expense card for use within category sections
 function ExpenseCardCompact({ expense }: { expense: Expense }) {
-  const categoryColorClasses = getCategoryColorClasses(expense.category);
   const [isDeleting, setIsDeleting] = useState(false);
   const { confirm } = useConfirmDialog();
   const { showError } = useToast();

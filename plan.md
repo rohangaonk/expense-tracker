@@ -12,25 +12,34 @@
 - [x] Deploy to Vercel
 - [x] Partial offline support (add offline, auto-sync)
 
-## Phase 2: UX Improvements 🎯 IN PROGRESS
-- [/] Dashboard redesign
-  - [/] Summary cards (Recurring, One-time, Grand Total)
-  - [ ] Group expenses by category (collapsible sections)
-  - [ ] Compact expense cards (reduce spacing)
-  - [ ] Visual category indicators (icons/colors)
-  - [ ] Sticky category headers on scroll
-- [/] Recurring expense support
-  - [ ] Add "recurring" flag to expense model (database migration)
-  - [ ] UI toggle for marking expenses as recurring
-  - [ ] Visual distinction (badge/icon) for recurring items
+## Phase 2: UX Improvements ✅ COMPLETE
+- [x] Dashboard redesign
+  - [x] Summary cards (Recurring, One-time, Grand Total)
+  - [x] Group expenses by category (collapsible sections)
+  - [x] Compact expense cards (reduce spacing)
+  - [x] Visual category indicators (icons/colors)
+  - [x] Category-based organization
+- [x] Recurring expense support
+  - [x] Add "recurring" flag to expense model (database migration)
+  - [x] UI toggle for marking expenses as recurring
+  - [x] Visual distinction (badge/icon) for recurring items
   - [ ] Filter to show/hide recurring expenses
-- [ ] Improved expense cards
-  - [ ] Smaller font sizes, tighter spacing
-  - [ ] Category color coding
-  - [ ] Merchant prominence
-  - [ ] Quick action buttons (edit/delete)
+- [x] Improved expense cards
+  - [x] Smaller font sizes, tighter spacing
+  - [x] Category color coding
+  - [x] Merchant prominence
+  - [x] Quick action buttons (edit/delete)
+- [x] Custom toast notifications (replaced browser alerts)
+- [x] Custom confirmation dialogs
+- [x] Predefined category system (15 categories)
+- [x] AI constrained to use predefined categories
 
 ## Phase 3: Categories & Organization
+- [x] Time-based filtering
+  - [x] Month view with navigation
+  - [x] Week view (Monday-Sunday)
+  - [x] Period selector UI component
+  - [x] URL state management
 - [ ] Custom category management
   - [ ] Create custom categories
   - [ ] Assign icons to categories
@@ -135,9 +144,27 @@
 
 ---
 
-## Current Focus: Phase 2 - UX Improvements
-**Next Steps:**
-1. Redesign dashboard with category grouping
-2. Add recurring expense flag to database
-3. Implement compact expense card design
-4. Add visual category indicators
+## Current Focus: Phase 3 - Time-Based Filtering Complete! 🎉
+
+**Recently Completed:**
+
+### Phase 2: UX Improvements ✅
+1. ✅ Dashboard redesign with summary cards
+2. ✅ Recurring expense tracking (database + UI)
+3. ✅ Category grouping with collapsible sections
+4. ✅ Compact, mobile-optimized design
+5. ✅ Custom toast notifications & dialogs
+6. ✅ 15 predefined categories with AI constraint
+
+### Phase 3: Time-Based Filtering ✅
+1. ✅ Month/Week view selector with tab-based UI
+2. ✅ Period navigation (previous/next arrows)
+3. ✅ Week definition: Monday-Sunday
+4. ✅ URL state management for bookmarking
+5. ✅ "Today" button for quick navigation
+6. ✅ Dynamic expense filtering by date range
+
+**Next Up: Categories & Organization**
+- Custom category management
+- Search & filtering (description, merchant, amount)
+- Bulk operations

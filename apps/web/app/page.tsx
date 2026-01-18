@@ -3,12 +3,22 @@ import { signout } from './auth/actions';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import ExpenseCard from './components/ExpenseCard';
 import PendingExpenses from './components/PendingExpenses';
 import SummaryCards from './components/SummaryCards';
 import CategorySection from './components/CategorySection';
+import PeriodSelector from './components/PeriodSelector';
+import { 
+  ViewMode, 
+  getMonthRange,
+  getWeekRange,
+  parseDateFromParam 
+} from './lib/date-utils';
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { view?: string; date?: string };
+}) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -16,7 +26,16 @@ export default async function Home() {
     redirect('/login');
   }
 
-  const dashboardData = await getDashboardData();
+  // Parse URL params for view mode and date
+  const viewMode = (searchParams.view as ViewMode) || 'month';
+  const selectedDate = parseDateFromParam(searchParams.date || null);
+
+  // Calculate date range based on view mode
+  const dateRange = viewMode === 'month' 
+    ? getMonthRange(selectedDate)
+    : getWeekRange(selectedDate);
+
+  const dashboardData = await getDashboardData(dateRange.start, dateRange.end);
 
   if (!dashboardData) {
     redirect('/login');
@@ -52,6 +71,9 @@ export default async function Home() {
 
         {/* Pending Sync Alert */}
         <PendingExpenses />
+
+        {/* Period Selector */}
+        <PeriodSelector />
 
         {/* Summary Cards */}
         <SummaryCards

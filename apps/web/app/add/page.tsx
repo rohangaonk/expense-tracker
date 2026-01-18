@@ -13,7 +13,7 @@ export default function AddExpensePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const [voiceTranscript, setVoiceTranscript] = useState('');
-  const { showSuccess, showInfo } = useToast();
+  const { showInfo } = useToast();
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ExpenseData>({
     defaultValues: {
