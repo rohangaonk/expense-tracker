@@ -1,17 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import * as z from 'zod'
+
 
 import { Button } from '@repo/ui/components/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@repo/ui/components/ui/card'
@@ -21,19 +17,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui/components/ui
 import { useToast } from '@repo/ui/hooks/use-toast'
 import { login, signup } from '@/app/auth/actions'
 
-const userAuthSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  fullName: z.string().optional(),
-})
-
-type FormData = z.infer<typeof userAuthSchema>
+type FormData = {
+  email: string
+  password: string
+  fullName?: string
+}
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [activeTab, setActiveTab] = useState<string>('login')
   const { toast } = useToast()
-  const router = useRouter()
 
   async function handleLogin(formData: FormData) {
     setIsLoading(true)

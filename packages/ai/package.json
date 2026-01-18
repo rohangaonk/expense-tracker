@@ -6,7 +6,8 @@
     ".": "./src/index.ts"
   },
   "devDependencies": {
-     "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20"
   },
   "dependencies": {
     "groq-sdk": "^0.3.2"

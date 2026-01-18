@@ -1,0 +1,177 @@
+'use client';
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { parseExpenseAction, saveExpenseAction, type ExpenseData } from '../actions/expense';
+import Link from 'next/link';
+
+export default function AddExpensePage() {
+  const [isParsing, setIsParsing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<ExpenseData>({
+    defaultValues: {
+      currency: 'INR',
+      date: new Date().toISOString().split('T')[0],
+    },
+  });
+
+  const [inputVal, setInputVal] = useState('');
+
+  const handleParse = async () => {
+    if (!inputVal.trim()) return;
+    setIsParsing(true);
+    setParseError(null);
+    try {
+      const parsed = await parseExpenseAction(inputVal);
+      if (parsed.amount) setValue('amount', parsed.amount);
+      if (parsed.currency) setValue('currency', parsed.currency);
+      if (parsed.category) setValue('category', parsed.category);
+      if (parsed.description) setValue('description', parsed.description);
+      if (parsed.merchant) setValue('merchant', parsed.merchant);
+      if (parsed.date) setValue('date', parsed.date);
+      if (parsed.time) setValue('time', parsed.time);
+    } catch (err) {
+      console.error(err);
+      setParseError('Failed to parse expense. Please try again.');
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
+  const onSubmit = async (data: ExpenseData) => {
+    setIsSaving(true);
+    try {
+      await saveExpenseAction(data);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save expense');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-black p-4">
+      <div className="max-w-md mx-auto space-y-6">
+        <header className="flex items-center justify-between">
+            <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+              &larr; Back
+            </Link>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Add Expense</h1>
+        </header>
+
+        <section className="space-y-3">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Natural Language Input
+          </label>
+          <div className="relative">
+            <textarea
+              className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all shadow-sm"
+              rows={3}
+              placeholder="e.g., Spent 150 on coffee at Starbucks"
+              value={inputVal}
+              onChange={(e) => setInputVal(e.target.value)}
+            />
+            <button
+              onClick={handleParse}
+              disabled={isParsing || !inputVal}
+              className="absolute bottom-3 right-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg disabled:opacity-50 transition-colors shadow-sm flex items-center gap-1"
+            >
+              {isParsing ? (
+                <span>Parsing...</span>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                    <path d="M15.98 1.804a1 1 0 0 0-1.215-.04l-7.276 5.25a1 1 0 0 0-.295 1.054l1.396 4.312-3.805 1.902a1 1 0 0 0-.48 1.137l.462 2.312a1 1 0 0 0 .98.804h.023l2.355-.392a1 1 0 0 0 .762-.777l.951-4.755 3.996-1.998a1 1 0 0 0 .5-1.528l-1.026-4.502 3.016-2.176a1 1 0 0 0-.154-1.65ZM5.286 9.42l3.498-2.527.702 3.067-4.2 .92 3.23-3.086Z" />
+                  </svg>
+                  Magic Parse
+                </>
+              )}
+            </button>
+          </div>
+          {parseError && <p className="text-red-500 text-xs">{parseError}</p>}
+        </section>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Amount</label>
+              <input
+                type="number"
+                step="0.01"
+                {...register('amount', { required: true, valueAsNumber: true })}
+                className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="0.00"
+              />
+              {errors.amount && <span className="text-red-500 text-xs">Required</span>}
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Currency</label>
+              <select
+                {...register('currency')}
+                className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="INR">INR</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Category</label>
+            <input
+              type="text"
+              {...register('category', { required: true })}
+              className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Food, Travel, etc."
+            />
+             {errors.category && <span className="text-red-500 text-xs">Required</span>}
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Description</label>
+            <input
+              type="text"
+              {...register('description', { required: true })}
+              className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Brief description"
+            />
+             {errors.description && <span className="text-red-500 text-xs">Required</span>}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Date</label>
+                <input
+                  type="date"
+                  {...register('date', { required: true })}
+                  className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+             </div>
+             <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Merchant (Optional)</label>
+                <input
+                  type="text"
+                  {...register('merchant')}
+                  className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="Store name"
+                />
+             </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-xl font-semibold text-lg hover:opacity-90 transition-opacity disabled:opacity-50 mt-6"
+          >
+            {isSaving ? 'Saving...' : 'Save Expense'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
