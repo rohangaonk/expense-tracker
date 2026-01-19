@@ -27,6 +27,8 @@ export type ExpenseData = {
   time?: string | null;
   is_recurring?: boolean;
   recurrence_period?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
+  is_house?: boolean;
+  is_parents?: boolean;
 };
 
 export async function saveExpenseAction(data: ExpenseData) {
@@ -49,6 +51,8 @@ export async function saveExpenseAction(data: ExpenseData) {
     is_synced: true, // Assuming online save for now
     is_recurring: data.is_recurring || false,
     recurrence_period: data.recurrence_period || null,
+    is_house: data.is_house || false,
+    is_parents: data.is_parents || false,
   });
 
   if (error) {
@@ -80,6 +84,8 @@ export async function saveExpenseForSync(data: ExpenseData) {
     is_synced: true,
     is_recurring: data.is_recurring || false,
     recurrence_period: data.recurrence_period || null,
+    is_house: data.is_house || false,
+    is_parents: data.is_parents || false,
   });
 
   if (error) {
@@ -156,6 +162,8 @@ export async function updateExpenseAction(id: string, data: ExpenseData) {
       time: data.time,
       is_recurring: data.is_recurring || false,
       recurrence_period: data.recurrence_period || null,
+      is_house: data.is_house || false,
+      is_parents: data.is_parents || false,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id);

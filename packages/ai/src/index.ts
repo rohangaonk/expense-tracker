@@ -12,13 +12,16 @@ export interface ParsedExpense {
   merchant: string | null;
   date: string | null; // YYYY-MM-DD
   time: string | null; // HH:mm
+  is_recurring: boolean;
+  is_house: boolean;
+  is_parents: boolean;
 }
 
 export async function parseExpense(text: string): Promise<ParsedExpense> {
   const categories = [
     'Food & Dining', 'Groceries', 'Transport', 'Shopping', 'Electronics',
     'Bills & Utilities', 'Entertainment', 'Health & Fitness', 'Education',
-    'Travel', 'Personal Care', 'Home & Garden', 'Gifts & Donations', 'Insurance', 'Other'
+    'Travel', 'Personal Care', 'Home & Garden', 'Gifts & Donations', 'Insurance', 'Family', 'Other'
   ];
 
   const prompt = `
@@ -30,10 +33,13 @@ export async function parseExpense(text: string): Promise<ParsedExpense> {
     - Merchant (if applicable)
     - Date (YYYY-MM-DD, assume current year if not specified. Today is ${new Date().toISOString().split('T')[0]})
     - Time (HH:mm, if specified)
+    - is_recurring (boolean): true if the expense repeats (e.g., "monthly subscription", "daily coffee")
+    - is_house (boolean): true if related to house renovation, construction, painting, hardware, etc.
+    - is_parents (boolean): true if money given to/spent on parents (e.g., "sent to dad", "mom's meds"). If true, Category should usually be "Family".
 
     User Input: "${text}"
 
-    Return ONLY a valid JSON object with keys: amount, currency, category, description, merchant, date, time.
+    Return ONLY a valid JSON object with keys: amount, currency, category, description, merchant, date, time, is_recurring, is_house, is_parents.
     IMPORTANT: The category MUST be exactly one of the predefined categories listed above.
     Do not add markdown formatting.
   `;

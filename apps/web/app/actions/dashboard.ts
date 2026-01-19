@@ -14,12 +14,17 @@ export interface Expense {
   created_at: string;
   is_recurring: boolean;
   recurrence_period: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
+  is_house?: boolean;
+  is_parents?: boolean;
 }
 
 export interface DashboardData {
   expenses: Expense[];
   totalAmount: number;
   recurringTotal: number;
+  houseTotal: number;
+  parentsTotal: number;
+  regularTotal: number;
   nonRecurringTotal: number;
   categoryBreakdown: Record<string, number>;
   expensesByCategory: Record<string, Expense[]>;
@@ -57,8 +62,20 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
 
   // Calculate totals
   const totalAmount = expenses?.reduce((sum, exp) => sum + Number(exp.amount), 0) || 0;
-  const recurringTotal = expenses?.filter(e => e.is_recurring).reduce((sum, exp) => sum + Number(exp.amount), 0) || 0;
-  const nonRecurringTotal = expenses?.filter(e => !e.is_recurring).reduce((sum, exp) => sum + Number(exp.amount), 0) || 0;
+  
+  const recurringExpenses = expenses?.filter(e => e.is_recurring) || [];
+  const recurringTotal = recurringExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
+
+  const houseExpenses = expenses?.filter(e => !e.is_recurring && e.is_house) || [];
+  const houseTotal = houseExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
+
+  const parentsExpenses = expenses?.filter(e => !e.is_recurring && e.is_parents) || [];
+  const parentsTotal = parentsExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
+
+  const regularExpenses = expenses?.filter(e => !e.is_recurring && !e.is_house && !e.is_parents) || [];
+  const regularTotal = regularExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
+  
+  const nonRecurringTotal = houseTotal + parentsTotal + regularTotal;
   
   // Category breakdown
   const categoryBreakdown: Record<string, number> = {};
@@ -81,6 +98,9 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
     expenses: expenses || [],
     totalAmount,
     recurringTotal,
+    houseTotal,
+    parentsTotal,
+    regularTotal,
     nonRecurringTotal,
     categoryBreakdown,
     expensesByCategory,

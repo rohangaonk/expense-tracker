@@ -39,6 +39,9 @@ export default function AddExpensePage() {
       if (parsed.merchant) setValue('merchant', parsed.merchant);
       if (parsed.date) setValue('date', parsed.date);
       if (parsed.time) setValue('time', parsed.time);
+      if (parsed.is_recurring) setValue('is_recurring', parsed.is_recurring);
+      if (parsed.is_house) setValue('is_house', parsed.is_house);
+      if (parsed.is_parents) setValue('is_parents', parsed.is_parents);
     } catch (err) {
       console.error(err);
       setParseError('Failed to parse expense. Please try again.');
@@ -191,6 +194,35 @@ export default function AddExpensePage() {
              </div>
           </div>
 
+
+          {/* Special Flags */}
+          <div className="grid grid-cols-2 gap-4">
+             <div className="flex items-center gap-3 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
+                <input
+                  type="checkbox"
+                  id="is_house"
+                  {...register('is_house')}
+                  className="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                />
+                <label htmlFor="is_house" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                  <span className="text-lg">🏠</span>
+                  House
+                </label>
+             </div>
+             
+             <div className="flex items-center gap-3 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                <input
+                  type="checkbox"
+                  id="is_parents"
+                  {...register('is_parents')}
+                  className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <label htmlFor="is_parents" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                  <span className="text-lg">👪</span>
+                  Parents
+                </label>
+             </div>
+          </div>
           {/* Recurring Expense Toggle */}
           <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
             <input

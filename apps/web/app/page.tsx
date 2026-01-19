@@ -41,9 +41,20 @@ export default async function Home({
     redirect('/login');
   }
 
-  const { expenses, totalAmount, recurringTotal, nonRecurringTotal, expensesByCategory } = dashboardData;
+  const { 
+    expenses, 
+    totalAmount, 
+    recurringTotal, 
+    houseTotal,
+    parentsTotal,
+    regularTotal,
+    expensesByCategory 
+  } = dashboardData;
 
   const recurringCount = expenses.filter(e => e.is_recurring).length;
+  const houseCount = expenses.filter(e => !e.is_recurring && e.category === 'House').length;
+  const parentsCount = expenses.filter(e => !e.is_recurring && e.category === 'Parents').length;
+  const regularCount = expenses.filter(e => !e.is_recurring && e.category !== 'House' && e.category !== 'Parents').length;
   const nonRecurringCount = expenses.filter(e => !e.is_recurring).length;
 
   return (
@@ -78,9 +89,14 @@ export default async function Home({
         {/* Summary Cards */}
         <SummaryCards
           recurring={recurringTotal}
-          nonRecurring={nonRecurringTotal}
+          houseTotal={houseTotal}
+          parentsTotal={parentsTotal}
+          regularTotal={regularTotal}
           total={totalAmount}
           recurringCount={recurringCount}
+          houseCount={houseCount}
+          parentsCount={parentsCount}
+          regularCount={regularCount}
           nonRecurringCount={nonRecurringCount}
         />
 

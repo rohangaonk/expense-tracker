@@ -14,6 +14,7 @@ export const EXPENSE_CATEGORIES = [
   { name: 'Home & Garden', icon: '🏠', color: 'lime' },
   { name: 'Gifts & Donations', icon: '🎁', color: 'violet' },
   { name: 'Insurance', icon: '🛡️', color: 'slate' },
+  { name: 'Family', icon: '👨‍👩‍👧‍👦', color: 'teal' },
   { name: 'Other', icon: '📦', color: 'gray' },
 ] as const;
 
