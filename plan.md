@@ -40,11 +40,12 @@
   - [x] Week view (Monday-Sunday)
   - [x] Period selector UI component
   - [x] URL state management
-- [ ] Custom category management
-  - [ ] Create custom categories
-  - [ ] Assign icons to categories
-  - [ ] Set category colors
-  - [ ] Default categories on signup
+- [x] House/Parents/Family Expense Tracking
+  - [x] Database migration for `is_house` and `is_parents` flags
+  - [x] UI checkboxes in Add Expense form
+  - [x] AI detection for House (Renovation) and Parents (Support) expenses
+  - [x] Dashboard summary cards for House and Parents
+  - [x] New "Family" category for better categorization
 - [ ] Search & filtering
   - [ ] Search by description/merchant
   - [ ] Filter by date range
@@ -156,15 +157,18 @@
 5. ✅ Custom toast notifications & dialogs
 6. ✅ 15 predefined categories with AI constraint
 
-### Phase 3: Time-Based Filtering ✅
+### Phase 3: Categories & Organization (Partial)
 1. ✅ Month/Week view selector with tab-based UI
 2. ✅ Period navigation (previous/next arrows)
 3. ✅ Week definition: Monday-Sunday
 4. ✅ URL state management for bookmarking
 5. ✅ "Today" button for quick navigation
 6. ✅ Dynamic expense filtering by date range
+7. ✅ House/Parents special expense tracking (flags + AI)
+8. ✅ "Family" category added
 
-**Next Up: Categories & Organization**
-- Custom category management
-- Search & filtering (description, merchant, amount)
-- Bulk operations
+**Next Up: Search & Filtering**
+- Search by description/merchant
+- Filter by category
+- Sort options
+

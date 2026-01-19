@@ -7,6 +7,8 @@ import PendingExpenses from './components/PendingExpenses';
 import SummaryCards from './components/SummaryCards';
 import CategorySection from './components/CategorySection';
 import PeriodSelector from './components/PeriodSelector';
+import ExpensesAnalysis from './components/ExpensesAnalysis';
+
 import { 
   ViewMode, 
   getMonthRange,
@@ -98,6 +100,15 @@ export default async function Home({
           parentsCount={parentsCount}
           regularCount={regularCount}
           nonRecurringCount={nonRecurringCount}
+        />
+
+        {/* Spending Analysis */}
+        <ExpensesAnalysis
+          regularTotal={regularTotal}
+          recurringTotal={recurringTotal}
+          houseTotal={houseTotal}
+          parentsTotal={parentsTotal}
+          expenses={expenses}
         />
 
         {/* Expenses List */}
