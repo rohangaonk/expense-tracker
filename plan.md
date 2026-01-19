@@ -72,10 +72,10 @@
   - [ ] Budget recommendations based on history
 
 ## Phase 5: Analytics & Insights
-- [ ] Spending trends
-  - [ ] Line chart: spending over time
-  - [ ] Bar chart: category breakdown
-  - [ ] Pie chart: expense distribution
+- [x] Spending trends
+  - [x] Bar chart: Daily spending trend (Month/Week views)
+  - [ ] Bar chart: category breakdown (Replaced by Pie Chart)
+  - [x] Pie chart: expense distribution (Regular, Recurring, House, Parents)
 - [ ] Comparisons
   - [ ] Month-over-month comparison
   - [ ] Year-over-year comparison
@@ -166,6 +166,11 @@
 6. ✅ Dynamic expense filtering by date range
 7. ✅ House/Parents special expense tracking (flags + AI)
 8. ✅ "Family" category added
+
+### Phase 5: Analytics & Insights (Started)
+1. ✅ Pie Chart: Distribution of expense types (Regular, Recurring, House, Parents)
+2. ✅ Bar Chart: Daily spending trends for selected period
+3. ✅ Toggleable Spending Analysis section
 
 **Next Up: Search & Filtering**
 - Search by description/merchant
