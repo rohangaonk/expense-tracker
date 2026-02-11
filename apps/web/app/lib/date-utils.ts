@@ -1,4 +1,4 @@
-export type ViewMode = 'month' | 'week';
+export type ViewMode = 'month' | 'week' | 'day';
 
 export interface DateRange {
   start: string; // YYYY-MM-DD format
@@ -19,6 +19,14 @@ export function getCurrentMonthRange(): DateRange {
 export function getCurrentWeekRange(): DateRange {
   const now = new Date();
   return getWeekRange(now);
+}
+
+/**
+ * Get the start and end dates for the current day
+ */
+export function getCurrentDayRange(): DateRange {
+  const now = new Date();
+  return getDayRange(now);
 }
 
 /**
@@ -59,30 +67,44 @@ export function getWeekRange(date: Date): DateRange {
 }
 
 /**
- * Navigate to the previous period (month or week)
+ * Get the start and end dates for a specific day
+ */
+export function getDayRange(date: Date): DateRange {
+  return {
+    start: formatDateForDB(date),
+    end: formatDateForDB(date),
+  };
+}
+
+/**
+ * Navigate to the previous period (month, week, or day)
  */
 export function getPreviousPeriod(date: Date, mode: ViewMode): Date {
   const newDate = new Date(date);
   
   if (mode === 'month') {
     newDate.setMonth(newDate.getMonth() - 1);
-  } else {
+  } else if (mode === 'week') {
     newDate.setDate(newDate.getDate() - 7);
+  } else {
+    newDate.setDate(newDate.getDate() - 1);
   }
   
   return newDate;
 }
 
 /**
- * Navigate to the next period (month or week)
+ * Navigate to the next period (month, week, or day)
  */
 export function getNextPeriod(date: Date, mode: ViewMode): Date {
   const newDate = new Date(date);
   
   if (mode === 'month') {
     newDate.setMonth(newDate.getMonth() + 1);
-  } else {
+  } else if (mode === 'week') {
     newDate.setDate(newDate.getDate() + 7);
+  } else {
+    newDate.setDate(newDate.getDate() + 1);
   }
   
   return newDate;
@@ -97,7 +119,7 @@ export function formatPeriodLabel(date: Date, mode: ViewMode): string {
       month: 'long', 
       year: 'numeric' 
     });
-  } else {
+  } else if (mode === 'week') {
     const { start, end } = getWeekRange(date);
     const startDate = new Date(start);
     const endDate = new Date(end);
@@ -111,6 +133,14 @@ export function formatPeriodLabel(date: Date, mode: ViewMode): string {
     } else {
       return `${startMonth} ${startDate.getDate()} - ${endMonth} ${endDate.getDate()}, ${year}`;
     }
+  } else {
+    // Day view
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'short',
+      month: 'long', 
+      day: 'numeric',
+      year: 'numeric' 
+    });
   }
 }
 
@@ -123,10 +153,12 @@ export function isCurrentPeriod(date: Date, mode: ViewMode): boolean {
   if (mode === 'month') {
     return date.getMonth() === now.getMonth() && 
            date.getFullYear() === now.getFullYear();
-  } else {
+  } else if (mode === 'week') {
     const currentWeek = getWeekRange(now);
     const checkWeek = getWeekRange(date);
     return currentWeek.start === checkWeek.start;
+  } else {
+    return formatDateForDB(date) === formatDateForDB(now);
   }
 }
 

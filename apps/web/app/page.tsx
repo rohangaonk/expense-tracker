@@ -5,14 +5,15 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import PendingExpenses from './components/PendingExpenses';
 import SummaryCards from './components/SummaryCards';
-import CategorySection from './components/CategorySection';
 import PeriodSelector from './components/PeriodSelector';
 import ExpensesAnalysis from './components/ExpensesAnalysis';
+import ExpenseList from './components/ExpenseList';
 
 import { 
   ViewMode, 
   getMonthRange,
   getWeekRange,
+  getDayRange,
   parseDateFromParam 
 } from './lib/date-utils';
 
@@ -33,9 +34,14 @@ export default async function Home({
   const selectedDate = parseDateFromParam(searchParams.date || null);
 
   // Calculate date range based on view mode
-  const dateRange = viewMode === 'month' 
-    ? getMonthRange(selectedDate)
-    : getWeekRange(selectedDate);
+  let dateRange;
+  if (viewMode === 'week') {
+    dateRange = getWeekRange(selectedDate);
+  } else if (viewMode === 'day') {
+    dateRange = getDayRange(selectedDate);
+  } else {
+    dateRange = getMonthRange(selectedDate);
+  }
 
   const dashboardData = await getDashboardData(dateRange.start, dateRange.end);
 
@@ -44,20 +50,19 @@ export default async function Home({
   }
 
   const { 
-    expenses, 
+    initialExpenses, 
     totalAmount, 
     recurringTotal, 
     houseTotal,
     parentsTotal,
     regularTotal,
-    expensesByCategory 
+    recurringCount,
+    houseCount,
+    parentsCount,
+    regularCount,
+    nonRecurringCount,
+    chartData
   } = dashboardData;
-
-  const recurringCount = expenses.filter(e => e.is_recurring).length;
-  const houseCount = expenses.filter(e => !e.is_recurring && e.category === 'House').length;
-  const parentsCount = expenses.filter(e => !e.is_recurring && e.category === 'Parents').length;
-  const regularCount = expenses.filter(e => !e.is_recurring && e.category !== 'House' && e.category !== 'Parents').length;
-  const nonRecurringCount = expenses.filter(e => !e.is_recurring).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-black dark:to-gray-950 p-4 pb-24">
@@ -108,11 +113,12 @@ export default async function Home({
           recurringTotal={recurringTotal}
           houseTotal={houseTotal}
           parentsTotal={parentsTotal}
-          expenses={expenses}
+          chartData={chartData}
+          viewMode={viewMode}
         />
 
         {/* Expenses List */}
-        {expenses.length === 0 ? (
+        {initialExpenses.length === 0 ? (
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-12 text-center shadow-sm border border-gray-100 dark:border-gray-800">
             <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
@@ -154,18 +160,11 @@ export default async function Home({
             </Link>
           </div>
         ) : (
-          <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Expenses by Category
-            </h2>
-            {Object.entries(expensesByCategory).map(([category, categoryExpenses]) => (
-              <CategorySection
-                key={category}
-                category={category}
-                expenses={categoryExpenses}
-              />
-            ))}
-          </div>
+          <ExpenseList 
+            initialExpenses={initialExpenses} 
+            startDate={dateRange.start}
+            endDate={dateRange.end}
+          />
         )}
       </div>
 

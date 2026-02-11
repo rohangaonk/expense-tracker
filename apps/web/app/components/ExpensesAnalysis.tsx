@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { ChartData } from '../actions/dashboard';
 import ExpensesPieChart from './ExpensesPieChart';
 import ExpensesBarChart from './ExpensesBarChart';
 
@@ -9,7 +10,8 @@ interface ExpensesAnalysisProps {
   recurringTotal: number;
   houseTotal: number;
   parentsTotal: number;
-  expenses: { date: string; amount: number }[];
+  chartData: ChartData[];
+  viewMode?: 'month' | 'week' | 'day';
 }
 
 export default function ExpensesAnalysis({
@@ -17,10 +19,19 @@ export default function ExpensesAnalysis({
   recurringTotal,
   houseTotal,
   parentsTotal,
-  expenses,
+  chartData,
+  viewMode = 'month',
 }: ExpensesAnalysisProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [chartType, setChartType] = useState<'pie' | 'bar'>('pie');
+  // Default to pie chart for day view, bar chart for others
+  const [chartType, setChartType] = useState<'pie' | 'bar'>(viewMode === 'day' ? 'pie' : 'pie');
+
+  // Update chart type when view mode changes
+  useEffect(() => {
+    if (viewMode === 'day') {
+      setChartType('pie');
+    }
+  }, [viewMode]);
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 mb-6">
@@ -87,7 +98,7 @@ export default function ExpensesAnalysis({
               parentsTotal={parentsTotal}
             />
           ) : (
-            <ExpensesBarChart expenses={expenses} />
+            <ExpensesBarChart expenses={chartData} />
           )}
         </div>
       )}

@@ -77,6 +77,16 @@ export default function PeriodSelector() {
           >
             Week
           </button>
+          <button
+            onClick={() => handleViewChange('day')}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              viewMode === 'day'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`}
+          >
+            Day
+          </button>
         </div>
         
         {!isCurrent && (

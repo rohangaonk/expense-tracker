@@ -18,16 +18,27 @@ export interface Expense {
   is_parents?: boolean;
 }
 
+export interface ChartData {
+  date: string;
+  amount: number;
+}
+
 export interface DashboardData {
-  expenses: Expense[];
+  initialExpenses: Expense[];
   totalAmount: number;
   recurringTotal: number;
   houseTotal: number;
   parentsTotal: number;
   regularTotal: number;
   nonRecurringTotal: number;
-  categoryBreakdown: Record<string, number>;
-  expensesByCategory: Record<string, Expense[]>;
+  // Counts
+  recurringCount: number;
+  houseCount: number;
+  parentsCount: number;
+  regularCount: number;
+  nonRecurringCount: number;
+  // chartData replaces expenses for analysis
+  chartData: ChartData[];
 }
 
 export async function getDashboardData(startDate?: string, endDate?: string): Promise<DashboardData | null> {
@@ -38,12 +49,114 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
     return null;
   }
 
+  // Use parallel queries for better performance
+  const [statsResult, chartDataResult, initialExpensesResult] = await Promise.all([
+    // Query 1: Get aggregated stats from database function
+    supabase.rpc('get_expense_stats', {
+      p_user_id: user.id,
+      p_start_date: startDate || null,
+      p_end_date: endDate || null
+    }),
+    
+    // Query 2: Get minimal chart data
+    supabase.rpc('get_chart_data', {
+      p_user_id: user.id,
+      p_start_date: startDate || null,
+      p_end_date: endDate || null
+    }),
+    
+    // Query 3: Get initial 20 expenses for display
+    (async () => {
+      let query = supabase
+        .from('expenses')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (startDate) {
+        query = query.gte('date', startDate);
+      }
+      if (endDate) {
+        query = query.lte('date', endDate);
+      }
+
+      return await query;
+    })()
+  ]);
+
+  // Handle errors
+  if (statsResult.error) {
+    console.error('Error fetching stats:', statsResult.error);
+    throw new Error('Failed to fetch expense stats');
+  }
+
+  if (chartDataResult.error) {
+    console.error('Error fetching chart data:', chartDataResult.error);
+    throw new Error('Failed to fetch chart data');
+  }
+
+  if (initialExpensesResult.error) {
+    console.error('Error fetching initial expenses:', initialExpensesResult.error);
+    throw new Error('Failed to fetch initial expenses');
+  }
+
+  // Extract stats (RPC returns array with single row)
+  const stats = statsResult.data?.[0] || {
+    total_amount: 0,
+    recurring_total: 0,
+    recurring_count: 0,
+    house_total: 0,
+    house_count: 0,
+    parents_total: 0,
+    parents_count: 0,
+    regular_total: 0,
+    regular_count: 0,
+    non_recurring_total: 0,
+    non_recurring_count: 0
+  };
+
+  // Convert chart data
+  const chartData: ChartData[] = (chartDataResult.data || []).map((row: { date: string; amount: number }) => ({
+    date: row.date,
+    amount: row.amount
+  }));
+
+  return {
+    initialExpenses: initialExpensesResult.data || [],
+    totalAmount: Number(stats.total_amount),
+    recurringTotal: Number(stats.recurring_total),
+    houseTotal: Number(stats.house_total),
+    parentsTotal: Number(stats.parents_total),
+    regularTotal: Number(stats.regular_total),
+    nonRecurringTotal: Number(stats.non_recurring_total),
+    recurringCount: Number(stats.recurring_count),
+    houseCount: Number(stats.house_count),
+    parentsCount: Number(stats.parents_count),
+    regularCount: Number(stats.regular_count),
+    nonRecurringCount: Number(stats.non_recurring_count),
+    chartData,
+  };
+}
+
+export async function getExpenses(page: number, limit: number = 20, startDate?: string, endDate?: string): Promise<Expense[]> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
   let query = supabase
     .from('expenses')
     .select('*')
-    .eq('user_id', user.id);
+    .eq('user_id', user.id)
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
-  // Apply date range filter if provided
   if (startDate) {
     query = query.gte('date', startDate);
   }
@@ -51,58 +164,12 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
     query = query.lte('date', endDate);
   }
 
-  const { data: expenses, error } = await query
-    .order('date', { ascending: false })
-    .order('created_at', { ascending: false });
+  const { data, error } = await query;
 
   if (error) {
-    console.error('Error fetching expenses:', error);
-    throw new Error('Failed to fetch expenses');
+    console.error('Error fetching paginated expenses:', error);
+    return [];
   }
 
-  // Calculate totals
-  const totalAmount = expenses?.reduce((sum, exp) => sum + Number(exp.amount), 0) || 0;
-  
-  const recurringExpenses = expenses?.filter(e => e.is_recurring) || [];
-  const recurringTotal = recurringExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
-
-  const houseExpenses = expenses?.filter(e => !e.is_recurring && e.is_house) || [];
-  const houseTotal = houseExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
-
-  const parentsExpenses = expenses?.filter(e => !e.is_recurring && e.is_parents) || [];
-  const parentsTotal = parentsExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
-
-  const regularExpenses = expenses?.filter(e => !e.is_recurring && !e.is_house && !e.is_parents) || [];
-  const regularTotal = regularExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
-  
-  const nonRecurringTotal = houseTotal + parentsTotal + regularTotal;
-  
-  // Category breakdown
-  const categoryBreakdown: Record<string, number> = {};
-  expenses?.forEach((exp) => {
-    const category = exp.category;
-    categoryBreakdown[category] = (categoryBreakdown[category] || 0) + Number(exp.amount);
-  });
-
-  // Group expenses by category
-  const expensesByCategory: Record<string, Expense[]> = {};
-  expenses?.forEach((exp) => {
-    const category = exp.category;
-    if (!expensesByCategory[category]) {
-      expensesByCategory[category] = [];
-    }
-    expensesByCategory[category].push(exp);
-  });
-
-  return {
-    expenses: expenses || [],
-    totalAmount,
-    recurringTotal,
-    houseTotal,
-    parentsTotal,
-    regularTotal,
-    nonRecurringTotal,
-    categoryBreakdown,
-    expensesByCategory,
-  };
+  return data;
 }
