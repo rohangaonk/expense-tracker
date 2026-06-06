@@ -16,6 +16,7 @@ export interface Expense {
   recurrence_period: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
   is_house?: boolean;
   is_parents?: boolean;
+  is_gym?: boolean;
 }
 
 export interface ChartData {
@@ -29,12 +30,14 @@ export interface DashboardData {
   recurringTotal: number;
   houseTotal: number;
   parentsTotal: number;
+  gymTotal: number;
   regularTotal: number;
   nonRecurringTotal: number;
   // Counts
   recurringCount: number;
   houseCount: number;
   parentsCount: number;
+  gymCount: number;
   regularCount: number;
   nonRecurringCount: number;
   // chartData replaces expenses for analysis
@@ -111,6 +114,8 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
     house_count: 0,
     parents_total: 0,
     parents_count: 0,
+    gym_total: 0,
+    gym_count: 0,
     regular_total: 0,
     regular_count: 0,
     non_recurring_total: 0,
@@ -129,11 +134,13 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
     recurringTotal: Number(stats.recurring_total),
     houseTotal: Number(stats.house_total),
     parentsTotal: Number(stats.parents_total),
+    gymTotal: Number(stats.gym_total),
     regularTotal: Number(stats.regular_total),
     nonRecurringTotal: Number(stats.non_recurring_total),
     recurringCount: Number(stats.recurring_count),
     houseCount: Number(stats.house_count),
     parentsCount: Number(stats.parents_count),
+    gymCount: Number(stats.gym_count),
     regularCount: Number(stats.regular_count),
     nonRecurringCount: Number(stats.non_recurring_count),
     chartData,

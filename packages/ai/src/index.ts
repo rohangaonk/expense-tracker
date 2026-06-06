@@ -15,6 +15,7 @@ export interface ParsedExpense {
   is_recurring: boolean;
   is_house: boolean;
   is_parents: boolean;
+  is_gym: boolean;
 }
 
 export async function parseExpense(text: string): Promise<ParsedExpense> {
@@ -36,10 +37,11 @@ export async function parseExpense(text: string): Promise<ParsedExpense> {
     - is_recurring (boolean): true if the expense repeats (e.g., "monthly subscription", "daily coffee")
     - is_house (boolean): true if related to house renovation, construction, painting, hardware, etc.
     - is_parents (boolean): true if money given to/spent on parents (e.g., "sent to dad", "mom's meds"). If true, Category should usually be "Family".
+    - is_gym (boolean): true if related to gym or fitness — gym membership, supplements (protein, creatine, etc.), sports/gym equipment, or if user explicitly mentions "gym" in context (e.g., "petrol to gym", "fruits for gym", "protein for gym").
 
     User Input: "${text}"
 
-    Return ONLY a valid JSON object with keys: amount, currency, category, description, merchant, date, time, is_recurring, is_house, is_parents.
+    Return ONLY a valid JSON object with keys: amount, currency, category, description, merchant, date, time, is_recurring, is_house, is_parents, is_gym.
     IMPORTANT: The category MUST be exactly one of the predefined categories listed above.
     Do not add markdown formatting.
   `;

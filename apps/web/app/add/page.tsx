@@ -42,6 +42,7 @@ export default function AddExpensePage() {
       if (parsed.is_recurring) setValue('is_recurring', parsed.is_recurring);
       if (parsed.is_house) setValue('is_house', parsed.is_house);
       if (parsed.is_parents) setValue('is_parents', parsed.is_parents);
+      if (parsed.is_gym) setValue('is_gym', parsed.is_gym);
     } catch (err) {
       console.error(err);
       setParseError('Failed to parse expense. Please try again.');
@@ -196,7 +197,7 @@ export default function AddExpensePage() {
 
 
           {/* Special Flags */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-3">
              <div className="flex items-center gap-3 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
                 <input
                   type="checkbox"
@@ -220,6 +221,19 @@ export default function AddExpensePage() {
                 <label htmlFor="is_parents" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
                   <span className="text-lg">👪</span>
                   Parents
+                </label>
+             </div>
+
+             <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+                <input
+                  type="checkbox"
+                  id="is_gym"
+                  {...register('is_gym')}
+                  className="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                <label htmlFor="is_gym" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                  <span className="text-lg">💪</span>
+                  Gym
                 </label>
              </div>
           </div>

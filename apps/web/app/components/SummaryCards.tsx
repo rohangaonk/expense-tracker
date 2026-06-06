@@ -4,12 +4,14 @@ interface SummaryCardsProps {
   recurring: number;
   houseTotal: number;
   parentsTotal: number;
+  gymTotal: number;
   regularTotal: number;
 
   total: number;
   recurringCount: number;
   houseCount: number;
   parentsCount: number;
+  gymCount: number;
   regularCount: number;
   nonRecurringCount: number;
 }
@@ -18,12 +20,14 @@ export default function SummaryCards({
   recurring, 
   houseTotal,
   parentsTotal,
+  gymTotal,
   regularTotal,
 
   total,
   recurringCount,
   houseCount,
   parentsCount,
+  gymCount,
   regularCount,
   nonRecurringCount 
 }: SummaryCardsProps) {
@@ -95,6 +99,18 @@ export default function SummaryCards({
             ₹{parentsTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
           </p>
           <p className="text-xs opacity-75 mt-0.5">{parentsCount} items</p>
+        </div>
+
+        {/* Gym */}
+        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg p-2.5 shadow-md text-white">
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-base">💪</span>
+            <p className="text-xs opacity-90">Gym</p>
+          </div>
+          <p className="text-lg font-bold leading-tight">
+            ₹{gymTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+          </p>
+          <p className="text-xs opacity-75 mt-0.5">{gymCount} items</p>
         </div>
       </div>
     </div>

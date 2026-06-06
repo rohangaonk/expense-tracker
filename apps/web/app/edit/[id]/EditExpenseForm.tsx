@@ -17,6 +17,9 @@ interface EditExpenseFormProps {
     time: string | null;
     is_recurring: boolean;
     recurrence_period: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
+    is_house?: boolean;
+    is_parents?: boolean;
+    is_gym?: boolean;
   };
 }
 
@@ -34,6 +37,9 @@ export default function EditExpenseForm({ expense }: EditExpenseFormProps) {
       time: expense.time,
       is_recurring: expense.is_recurring,
       recurrence_period: expense.recurrence_period,
+      is_house: expense.is_house || false,
+      is_parents: expense.is_parents || false,
+      is_gym: expense.is_gym || false,
     },
   });
 
@@ -112,6 +118,48 @@ export default function EditExpenseForm({ expense }: EditExpenseFormProps) {
                 className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 placeholder="Store name"
               />
+            </div>
+          </div>
+
+          {/* Special Flags */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="flex items-center gap-3 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
+              <input
+                type="checkbox"
+                id="is_house"
+                {...register('is_house')}
+                className="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+              />
+              <label htmlFor="is_house" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                <span className="text-lg">🏠</span>
+                House
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
+              <input
+                type="checkbox"
+                id="is_parents"
+                {...register('is_parents')}
+                className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <label htmlFor="is_parents" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                <span className="text-lg">👪</span>
+                Parents
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+              <input
+                type="checkbox"
+                id="is_gym"
+                {...register('is_gym')}
+                className="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+              />
+              <label htmlFor="is_gym" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                <span className="text-lg">💪</span>
+                Gym
+              </label>
             </div>
           </div>
 

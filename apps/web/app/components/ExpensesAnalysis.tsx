@@ -10,6 +10,7 @@ interface ExpensesAnalysisProps {
   recurringTotal: number;
   houseTotal: number;
   parentsTotal: number;
+  gymTotal: number;
   chartData: ChartData[];
   viewMode?: 'month' | 'week' | 'day';
 }
@@ -19,6 +20,7 @@ export default function ExpensesAnalysis({
   recurringTotal,
   houseTotal,
   parentsTotal,
+  gymTotal,
   chartData,
   viewMode = 'month',
 }: ExpensesAnalysisProps) {
@@ -96,6 +98,7 @@ export default function ExpensesAnalysis({
               recurringTotal={recurringTotal}
               houseTotal={houseTotal}
               parentsTotal={parentsTotal}
+              gymTotal={gymTotal}
             />
           ) : (
             <ExpensesBarChart expenses={chartData} />

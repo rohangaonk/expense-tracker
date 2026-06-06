@@ -52,6 +52,11 @@ export default function ExpenseCard({ expense }: { expense: Expense }) {
                  🔄 Recurring
                </span>
              )}
+             {expense.is_gym && (
+               <span className="flex items-center gap-1 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                 💪 Gym
+               </span>
+             )}
             {expense.merchant && <span>{expense.merchant}</span>}
             {(expense.merchant || expense.is_recurring) && <span>•</span>}
             <span>

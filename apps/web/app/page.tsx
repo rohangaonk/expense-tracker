@@ -55,10 +55,12 @@ export default async function Home({
     recurringTotal, 
     houseTotal,
     parentsTotal,
+    gymTotal,
     regularTotal,
     recurringCount,
     houseCount,
     parentsCount,
+    gymCount,
     regularCount,
     nonRecurringCount,
     chartData
@@ -98,11 +100,13 @@ export default async function Home({
           recurring={recurringTotal}
           houseTotal={houseTotal}
           parentsTotal={parentsTotal}
+          gymTotal={gymTotal}
           regularTotal={regularTotal}
           total={totalAmount}
           recurringCount={recurringCount}
           houseCount={houseCount}
           parentsCount={parentsCount}
+          gymCount={gymCount}
           regularCount={regularCount}
           nonRecurringCount={nonRecurringCount}
         />
@@ -113,6 +117,7 @@ export default async function Home({
           recurringTotal={recurringTotal}
           houseTotal={houseTotal}
           parentsTotal={parentsTotal}
+          gymTotal={gymTotal}
           chartData={chartData}
           viewMode={viewMode}
         />

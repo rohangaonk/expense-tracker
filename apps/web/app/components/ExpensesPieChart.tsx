@@ -7,6 +7,7 @@ interface ExpensesPieChartProps {
   recurringTotal: number;
   houseTotal: number;
   parentsTotal: number;
+  gymTotal: number;
 }
 
 export default function ExpensesPieChart({
@@ -14,12 +15,14 @@ export default function ExpensesPieChart({
   recurringTotal,
   houseTotal,
   parentsTotal,
+  gymTotal,
 }: ExpensesPieChartProps) {
   const data = [
     { name: 'Regular', value: regularTotal, color: '#a855f7' }, // Purple
     { name: 'Recurring', value: recurringTotal, color: '#3b82f6' }, // Blue
     { name: 'House', value: houseTotal, color: '#f97316' }, // Orange
     { name: 'Parents', value: parentsTotal, color: '#6366f1' }, // Indigo
+    { name: 'Gym', value: gymTotal, color: '#10b981' }, // Emerald
   ].filter(item => item.value > 0);
 
   const formatCurrency = (value: number) => 

@@ -29,6 +29,7 @@ export type ExpenseData = {
   recurrence_period?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
   is_house?: boolean;
   is_parents?: boolean;
+  is_gym?: boolean;
 };
 
 export async function saveExpenseAction(data: ExpenseData) {
@@ -53,6 +54,7 @@ export async function saveExpenseAction(data: ExpenseData) {
     recurrence_period: data.recurrence_period || null,
     is_house: data.is_house || false,
     is_parents: data.is_parents || false,
+    is_gym: data.is_gym || false,
   });
 
   if (error) {
@@ -86,6 +88,7 @@ export async function saveExpenseForSync(data: ExpenseData) {
     recurrence_period: data.recurrence_period || null,
     is_house: data.is_house || false,
     is_parents: data.is_parents || false,
+    is_gym: data.is_gym || false,
   });
 
   if (error) {
@@ -164,6 +167,7 @@ export async function updateExpenseAction(id: string, data: ExpenseData) {
       recurrence_period: data.recurrence_period || null,
       is_house: data.is_house || false,
       is_parents: data.is_parents || false,
+      is_gym: data.is_gym || false,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id);
