@@ -1,6 +1,6 @@
 'use server';
 
-import { parseExpense as aiParseExpense, ParsedExpense } from '@repo/ai';
+import { parseExpense as aiParseExpense, parseExpenses as aiParseExpenses, ParsedExpense } from '@repo/ai';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
@@ -13,6 +13,17 @@ export async function parseExpenseAction(text: string): Promise<ParsedExpense> {
     return await aiParseExpense(text);
   } catch (error) {
     console.error('Error in parseExpenseAction:', error);
+    throw error;
+  }
+}
+
+// Parse multiple expenses from a single natural-language input.
+export async function parseExpensesAction(text: string): Promise<ParsedExpense[]> {
+  if (!text) throw new Error('Input text is required');
+  try {
+    return await aiParseExpenses(text);
+  } catch (error) {
+    console.error('Error in parseExpensesAction:', error);
     throw error;
   }
 }
@@ -63,6 +74,41 @@ export async function saveExpenseAction(data: ExpenseData) {
   }
 
   redirect('/'); // Redirect to dashboard after save
+}
+
+// Save multiple expenses in a single DB round-trip.
+export async function saveBulkExpensesAction(items: ExpenseData[]) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('User not authenticated');
+  if (!items.length) throw new Error('No items to save');
+
+  const rows = items.map((data) => ({
+    user_id: user.id,
+    amount: data.amount,
+    currency: data.currency,
+    category: data.category,
+    description: data.description,
+    merchant: data.merchant ?? null,
+    date: data.date,
+    time: data.time ?? null,
+    is_synced: true,
+    is_recurring: data.is_recurring || false,
+    recurrence_period: data.recurrence_period || null,
+    is_house: data.is_house || false,
+    is_parents: data.is_parents || false,
+    is_gym: data.is_gym || false,
+  }));
+
+  const { error } = await supabase.from('expenses').insert(rows);
+
+  if (error) {
+    console.error('Error saving bulk expenses:', error);
+    throw new Error('Failed to save expenses');
+  }
+
+  redirect('/');
 }
 
 // Version without redirect for background sync

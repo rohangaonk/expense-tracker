@@ -1,135 +1,379 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
-import { parseExpenseAction, saveExpenseAction, type ExpenseData } from '../actions/expense';
+import { useState, useEffect, useCallback, useId } from 'react';
+import {
+  parseExpensesAction,
+  saveBulkExpensesAction,
+  type ExpenseData,
+} from '../actions/expense';
 import { addToSyncQueue } from '../../lib/offline/sync';
 import Link from 'next/link';
 import VoiceButton from '../components/VoiceButton';
 import { useToast } from '../../components/ToastProvider';
+import { ParsedExpense } from '@repo/ai';
 
+// ---------------------------------------------------------------------------
+// Categories
+// ---------------------------------------------------------------------------
+const CATEGORIES = [
+  'Food & Dining', 'Groceries', 'Transport', 'Shopping', 'Electronics',
+  'Bills & Utilities', 'Entertainment', 'Health & Fitness', 'Education',
+  'Travel', 'Personal Care', 'Home & Garden', 'Gifts & Donations',
+  'Insurance', 'Family', 'Other',
+];
+
+// ---------------------------------------------------------------------------
+// ReviewItem — an editable parsed expense card
+// ---------------------------------------------------------------------------
+interface ReviewItemProps {
+  item: ParsedExpense & { _id: string };
+  index: number;
+  onChange: (id: string, updated: Partial<ParsedExpense>) => void;
+  onRemove: (id: string) => void;
+}
+
+function ReviewItem({ item, index, onChange, onRemove }: ReviewItemProps) {
+  const [editing, setEditing] = useState(false);
+  const uid = useId();
+
+  const field = (key: keyof ParsedExpense, value: unknown) =>
+    onChange(item._id, { [key]: value });
+
+  return (
+    <div className={`bg-white dark:bg-gray-900 rounded-xl border transition-all duration-200 shadow-sm ${
+      editing
+        ? 'border-blue-400 dark:border-blue-500 ring-2 ring-blue-100 dark:ring-blue-900/40'
+        : 'border-gray-100 dark:border-gray-800'
+    }`}>
+      {/* Collapsed summary row */}
+      {!editing && (
+        <div className="flex items-center gap-3 px-4 py-3">
+          {/* Index badge */}
+          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs font-bold flex items-center justify-center">
+            {index + 1}
+          </span>
+
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              {item.description || <span className="text-gray-400 italic">No description</span>}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+              {item.category} • {item.date}
+              {item.is_recurring && ' • 🔄'}
+              {item.is_gym && ' • 💪'}
+              {item.is_parents && ' • 👪'}
+              {item.is_house && ' • 🏠'}
+            </p>
+          </div>
+
+          <p className="flex-shrink-0 text-base font-bold text-gray-900 dark:text-white">
+            ₹{Number(item.amount || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+          </p>
+
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button
+              onClick={() => setEditing(true)}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+              title="Edit"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+              </svg>
+            </button>
+            <button
+              onClick={() => onRemove(item._id)}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              title="Remove"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Expanded editor */}
+      {editing && (
+        <div className="p-4 space-y-3">
+          {/* Row 1: Amount + Date */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400">Amount (₹)</label>
+              <input
+                id={`${uid}-amount`}
+                type="number"
+                step="0.01"
+                value={item.amount ?? ''}
+                onChange={e => field('amount', parseFloat(e.target.value))}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="0"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400">Date</label>
+              <input
+                id={`${uid}-date`}
+                type="date"
+                value={item.date ?? ''}
+                onChange={e => field('date', e.target.value)}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Description */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400">Description</label>
+            <input
+              id={`${uid}-desc`}
+              type="text"
+              value={item.description}
+              onChange={e => field('description', e.target.value)}
+              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Brief description"
+            />
+          </div>
+
+          {/* Row 3: Category + Merchant */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400">Category</label>
+              <select
+                id={`${uid}-cat`}
+                value={item.category}
+                onChange={e => field('category', e.target.value)}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400">Merchant</label>
+              <input
+                id={`${uid}-merchant`}
+                type="text"
+                value={item.merchant ?? ''}
+                onChange={e => field('merchant', e.target.value || null)}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Optional"
+              />
+            </div>
+          </div>
+
+          {/* Row 4: Flags */}
+          <div className="flex flex-wrap gap-2 pt-1">
+            {([
+              ['is_recurring', '🔄', 'Recurring', 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300'],
+              ['is_house',     '🏠', 'House',     'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300'],
+              ['is_parents',   '👪', 'Parents',   'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300'],
+              ['is_gym',       '💪', 'Gym',       'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'],
+            ] as [keyof ParsedExpense, string, string, string][]).map(([key, emoji, label, activeClass]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => field(key, !item[key])}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${
+                  item[key]
+                    ? activeClass
+                    : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
+                }`}
+              >
+                {emoji} {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Done button */}
+          <div className="flex justify-end pt-1">
+            <button
+              onClick={() => setEditing(false)}
+              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Blank expense template
+// ---------------------------------------------------------------------------
+const today = new Date().toISOString().split('T')[0];
+
+function blankItem(): ParsedExpense & { _id: string } {
+  return {
+    _id: crypto.randomUUID(),
+    amount: null,
+    currency: 'INR',
+    category: 'Other',
+    description: '',
+    merchant: null,
+    date: today,
+    time: null,
+    is_recurring: false,
+    is_house: false,
+    is_parents: false,
+    is_gym: false,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Main Add Expense Page
+// ---------------------------------------------------------------------------
 export default function AddExpensePage() {
+  const [inputVal, setInputVal] = useState('');
+  const [voiceTranscript, setVoiceTranscript] = useState('');
   const [isParsing, setIsParsing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
-  const [voiceTranscript, setVoiceTranscript] = useState('');
-  const { showInfo } = useToast();
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ExpenseData>({
-    defaultValues: {
-      currency: 'INR',
-      date: new Date().toISOString().split('T')[0],
-      is_recurring: false,
-    },
-  });
+  // null = input step; array = review step
+  const [items, setItems] = useState<(ParsedExpense & { _id: string })[] | null>(null);
 
-  const [inputVal, setInputVal] = useState('');
-  const isRecurring = watch('is_recurring');
+  const { showInfo, showError } = useToast();
 
+  // ---- Parsing ----
   const handleParse = useCallback(async () => {
     if (!inputVal.trim()) return;
     setIsParsing(true);
     setParseError(null);
     try {
-      const parsed = await parseExpenseAction(inputVal);
-      if (parsed.amount) setValue('amount', parsed.amount);
-      if (parsed.currency) setValue('currency', parsed.currency);
-      if (parsed.category) setValue('category', parsed.category);
-      if (parsed.description) setValue('description', parsed.description);
-      if (parsed.merchant) setValue('merchant', parsed.merchant);
-      if (parsed.date) setValue('date', parsed.date);
-      if (parsed.time) setValue('time', parsed.time);
-      if (parsed.is_recurring) setValue('is_recurring', parsed.is_recurring);
-      if (parsed.is_house) setValue('is_house', parsed.is_house);
-      if (parsed.is_parents) setValue('is_parents', parsed.is_parents);
-      if (parsed.is_gym) setValue('is_gym', parsed.is_gym);
+      const parsed = await parseExpensesAction(inputVal);
+      setItems(
+        parsed.map(p => ({ ...p, _id: crypto.randomUUID() }))
+      );
     } catch (err) {
       console.error(err);
-      setParseError('Failed to parse expense. Please try again.');
+      setParseError('Could not parse expenses. Please try again.');
     } finally {
       setIsParsing(false);
     }
-  }, [inputVal, setValue]);
+  }, [inputVal]);
 
-  const onSubmit = async (data: ExpenseData) => {
+  // Auto-parse after voice recording
+  const handleRecordingComplete = (transcript: string) => {
+    setVoiceTranscript(transcript);
+    setInputVal(transcript);
+  };
+  useEffect(() => {
+    if (voiceTranscript.trim()) {
+      handleParse();
+      setVoiceTranscript('');
+    }
+  }, [voiceTranscript, handleParse]);
+
+  // ---- Item mutations ----
+  const handleChange = (id: string, updated: Partial<ParsedExpense>) => {
+    setItems(prev => prev?.map(it => it._id === id ? { ...it, ...updated } : it) ?? null);
+  };
+  const handleRemove = (id: string) => {
+    setItems(prev => {
+      const next = prev?.filter(it => it._id !== id) ?? null;
+      return next?.length ? next : null; // go back to input step if all removed
+    });
+  };
+  const handleAddBlank = () => {
+    setItems(prev => [...(prev ?? []), blankItem()]);
+  };
+
+  // ---- Saving ----
+  const handleSave = async () => {
+    if (!items?.length) return;
+
+    // Validate: every item must have amount > 0 and a description
+    const invalid = items.find(it => !it.amount || it.amount <= 0 || !it.description.trim());
+    if (invalid) {
+      showError('Each expense needs an amount and description.');
+      return;
+    }
+
     setIsSaving(true);
     try {
+      const expenseData: ExpenseData[] = items.map(it => ({
+        amount: it.amount!,
+        currency: it.currency || 'INR',
+        category: it.category,
+        description: it.description,
+        merchant: it.merchant ?? null,
+        date: it.date ?? today,
+        time: it.time ?? null,
+        is_recurring: it.is_recurring,
+        recurrence_period: null,
+        is_house: it.is_house,
+        is_parents: it.is_parents,
+        is_gym: it.is_gym,
+      }));
+
       if (navigator.onLine) {
-        await saveExpenseAction(data);
+        await saveBulkExpensesAction(expenseData);
       } else {
-        await addToSyncQueue(data);
-        showInfo('You are offline. Expense saved locally and will sync when online.');
-         // Optional: Reset form here as if success
+        for (const data of expenseData) {
+          await addToSyncQueue(data);
+        }
+        showInfo(`You are offline. ${expenseData.length} expense${expenseData.length > 1 ? 's' : ''} saved locally and will sync when online.`);
+        setItems(null);
+        setInputVal('');
       }
-      // Reset form on success (both online/offline cases, assuming addToSyncQueue doesn't throw easily)
-      setInputVal('');
-      setVoiceTranscript('');
-      // You might want to reset the form fields too if not redirected
     } catch (err) {
       console.error(err);
-      alert('Failed to save expense');
+      showError('Failed to save expenses. Please try again.');
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Handle voice transcript updates
-  const handleTranscriptChange = (transcript: string) => {
-    setInputVal(transcript);
-  };
-
-  // Auto-parse when voice recording completes
-  const handleRecordingComplete = (transcript: string) => {
-    setVoiceTranscript(transcript);
-    setInputVal(transcript);
-  };
-
-  // Trigger parsing when voice transcript is set
-  useEffect(() => {
-    if (voiceTranscript && voiceTranscript.trim()) {
-      handleParse();
-      setVoiceTranscript(''); // Reset to avoid re-parsing
-    }
-  }, [voiceTranscript, handleParse]);
-
+  // ---- Render ----
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black p-4">
-      <div className="max-w-md mx-auto space-y-6">
-        <header className="flex items-center justify-between">
-            <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
-              &larr; Back
-            </Link>
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Add Expense</h1>
+      <div className="max-w-md mx-auto space-y-5">
+
+        {/* Header */}
+        <header className="flex items-center justify-between pt-2">
+          <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+            ← Back
+          </Link>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Add Expenses</h1>
+          {/* Spacer to center title */}
+          <span className="w-10" />
         </header>
 
-        <section className="space-y-3">
+        {/* ── Step 1: Input ── */}
+        <section className="space-y-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Natural Language Input
+            What did you spend on?
           </label>
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            You can enter multiple expenses separated by commas — e.g. <em>500 pizza, 180 petrol, 100 milk</em>
+          </p>
           <div className="relative">
             <textarea
-              className="w-full p-3 pr-24 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all shadow-sm"
+              className="w-full p-3 pr-24 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all shadow-sm resize-none"
               rows={3}
-              placeholder="e.g., Spent 150 on coffee at Starbucks"
+              placeholder="e.g. 500 pizza, 180 petrol, 100 milk"
               value={inputVal}
-              onChange={(e) => setInputVal(e.target.value)}
+              onChange={e => setInputVal(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleParse(); }}
             />
             <div className="absolute bottom-3 right-3 flex items-center gap-2">
               <VoiceButton
-                onTranscriptChange={handleTranscriptChange}
+                onTranscriptChange={setInputVal}
                 onRecordingComplete={handleRecordingComplete}
               />
               <button
                 onClick={handleParse}
-                disabled={isParsing || !inputVal}
+                disabled={isParsing || !inputVal.trim()}
                 className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg disabled:opacity-50 transition-colors shadow-sm flex items-center gap-1"
               >
                 {isParsing ? (
-                  <span>Parsing...</span>
+                  <span>Parsing…</span>
                 ) : (
                   <>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
-                      <path d="M15.98 1.804a1 1 0 0 0-1.215-.04l-7.276 5.25a1 1 0 0 0-.295 1.054l1.396 4.312-3.805 1.902a1 1 0 0 0-.48 1.137l.462 2.312a1 1 0 0 0 .98.804h.023l2.355-.392a1 1 0 0 0 .762-.777l.951-4.755 3.996-1.998a1 1 0 0 0 .5-1.528l-1.026-4.502 3.016-2.176a1 1 0 0 0-.154-1.65ZM5.286 9.42l3.498-2.527.702 3.067-4.2 .92 3.23-3.086Z" />
+                      <path d="M15.98 1.804a1 1 0 0 0-1.215-.04l-7.276 5.25a1 1 0 0 0-.295 1.054l1.396 4.312-3.805 1.902a1 1 0 0 0-.48 1.137l.462 2.312a1 1 0 0 0 .98.804h.023l2.355-.392a1 1 0 0 0 .762-.777l.951-4.755 3.996-1.998a1 1 0 0 0 .5-1.528l-1.026-4.502 3.016-2.176a1 1 0 0 0-.154-1.65Z" />
                     </svg>
                     Magic Parse
                   </>
@@ -140,144 +384,64 @@ export default function AddExpensePage() {
           {parseError && <p className="text-red-500 text-xs">{parseError}</p>}
         </section>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Amount (₹)</label>
-            <input
-              type="number"
-              step="0.01"
-              {...register('amount', { required: true, valueAsNumber: true })}
-              className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="0.00"
-            />
-            {errors.amount && <span className="text-red-500 text-xs">Required</span>}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Category</label>
-            <input
-              type="text"
-              {...register('category', { required: true })}
-              className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="Food, Travel, etc."
-            />
-             {errors.category && <span className="text-red-500 text-xs">Required</span>}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Description</label>
-            <input
-              type="text"
-              {...register('description', { required: true })}
-              className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="Brief description"
-            />
-             {errors.description && <span className="text-red-500 text-xs">Required</span>}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-             <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Date</label>
-                <input
-                  type="date"
-                  {...register('date', { required: true })}
-                  className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-             </div>
-             <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Merchant (Optional)</label>
-                <input
-                  type="text"
-                  {...register('merchant')}
-                  className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  placeholder="Store name"
-                />
-             </div>
-          </div>
-
-
-          {/* Special Flags */}
-          <div className="grid grid-cols-3 gap-3">
-             <div className="flex items-center gap-3 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-                <input
-                  type="checkbox"
-                  id="is_house"
-                  {...register('is_house')}
-                  className="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
-                />
-                <label htmlFor="is_house" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
-                  <span className="text-lg">🏠</span>
-                  House
-                </label>
-             </div>
-             
-             <div className="flex items-center gap-3 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
-                <input
-                  type="checkbox"
-                  id="is_parents"
-                  {...register('is_parents')}
-                  className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                <label htmlFor="is_parents" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
-                  <span className="text-lg">👪</span>
-                  Parents
-                </label>
-             </div>
-
-             <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-                <input
-                  type="checkbox"
-                  id="is_gym"
-                  {...register('is_gym')}
-                  className="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
-                />
-                <label htmlFor="is_gym" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
-                  <span className="text-lg">💪</span>
-                  Gym
-                </label>
-             </div>
-          </div>
-          {/* Recurring Expense Toggle */}
-          <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-            <input
-              type="checkbox"
-              id="is_recurring"
-              {...register('is_recurring')}
-              className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="is_recurring" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
-              <span className="text-lg">🔄</span>
-              Mark as recurring expense
-            </label>
-          </div>
-
-          {/* Recurrence Period (shown only if recurring is checked) */}
-          {isRecurring && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Recurrence Period
-              </label>
-              <select
-                {...register('recurrence_period')}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        {/* ── Step 2: Review list ── */}
+        {items && items.length > 0 && (
+          <section className="space-y-3">
+            {/* Section header */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Review {items.length} expense{items.length !== 1 ? 's' : ''}
+              </h2>
+              <button
+                onClick={() => { setItems(null); }}
+                className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
-                <option value="">Select period...</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
+                ← Re-parse
+              </button>
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-xl font-semibold text-lg hover:opacity-90 transition-opacity disabled:opacity-50 mt-6"
-          >
-            {isSaving ? 'Saving...' : 'Save Expense'}
-          </button>
-        </form>
+            {/* Cards */}
+            <div className="space-y-2">
+              {items.map((item, i) => (
+                <ReviewItem
+                  key={item._id}
+                  item={item}
+                  index={i}
+                  onChange={handleChange}
+                  onRemove={handleRemove}
+                />
+              ))}
+            </div>
+
+            {/* Add another row */}
+            <button
+              onClick={handleAddBlank}
+              className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-400 dark:text-gray-500 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-600 dark:hover:text-gray-400 transition-all flex items-center justify-center gap-1.5"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Add another expense
+            </button>
+
+            {/* Total + Save */}
+            <div className="bg-gray-900 dark:bg-gray-800 rounded-xl px-4 py-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-400">Total</p>
+                <p className="text-xl font-bold text-white">
+                  ₹{items.reduce((s, it) => s + (it.amount || 0), 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                </p>
+              </div>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="px-5 py-2.5 bg-white dark:bg-gray-100 text-gray-900 text-sm font-semibold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {isSaving ? 'Saving…' : `Save ${items.length} expense${items.length !== 1 ? 's' : ''}`}
+              </button>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
