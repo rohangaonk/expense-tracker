@@ -9,12 +9,14 @@ interface ExpensesAnalysisProps {
   categoryStats: CategoryStat[];
   chartData: ChartData[];
   viewMode?: 'month' | 'week' | 'day';
+  activeCategory?: string | null;
 }
 
 export default function ExpensesAnalysis({
   categoryStats,
   chartData,
   viewMode = 'month',
+  activeCategory,
 }: ExpensesAnalysisProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [chartType, setChartType] = useState<'pie' | 'bar'>('pie');
@@ -22,6 +24,13 @@ export default function ExpensesAnalysis({
   useEffect(() => {
     if (viewMode === 'day') setChartType('pie');
   }, [viewMode]);
+
+  // Force Bar Chart (Daily Trend) when a single category filter is active
+  useEffect(() => {
+    if (activeCategory) {
+      setChartType('bar');
+    }
+  }, [activeCategory]);
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 mb-6">
@@ -58,12 +67,14 @@ export default function ExpensesAnalysis({
           <div className="flex justify-center mb-4">
             <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl inline-flex">
               <button
+                disabled={!!activeCategory}
                 onClick={() => setChartType('pie')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   chartType === 'pie'
                     ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
+                } ${activeCategory ? 'opacity-40 cursor-not-allowed' : ''}`}
+                title={activeCategory ? 'Distribution chart is disabled when filtering a single category' : undefined}
               >
                 <span className="mr-2">🥧</span> Distribution
               </button>

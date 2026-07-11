@@ -32,7 +32,7 @@ export interface DashboardData {
   chartData: ChartData[];
 }
 
-export async function getDashboardData(startDate?: string, endDate?: string): Promise<DashboardData | null> {
+export async function getDashboardData(startDate?: string, endDate?: string, category?: string): Promise<DashboardData | null> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -48,12 +48,18 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
       p_end_date: endDate || null,
     }),
 
-    // Query 2: Chart data
-    supabase.rpc('get_chart_data', {
-      p_user_id: user.id,
-      p_start_date: startDate || null,
-      p_end_date: endDate || null,
-    }),
+    // Query 2: Chart data (query directly to allow category filtering)
+    (async () => {
+      let query = supabase
+        .from('expenses')
+        .select('date, amount, category')
+        .eq('user_id', user.id);
+
+      if (startDate) query = query.gte('date', startDate);
+      if (endDate)   query = query.lte('date', endDate);
+
+      return await query;
+    })(),
 
     // Query 3: First 20 expenses for display
     (async () => {
@@ -67,6 +73,7 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
 
       if (startDate) query = query.gte('date', startDate);
       if (endDate)   query = query.lte('date', endDate);
+      if (category)  query = query.eq('category', category);
 
       return await query;
     })(),
@@ -93,10 +100,12 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
 
   const totalAmount = categoryStats.reduce((sum, s) => sum + s.total_amount, 0);
 
-  const chartData: ChartData[] = (chartDataResult.data || []).map((row: { date: string; amount: number }) => ({
-    date: row.date,
-    amount: row.amount,
-  }));
+  const chartData: ChartData[] = (chartDataResult.data || [])
+    .filter((row: { date: string; amount: number; category: string }) => !category || row.category === category)
+    .map((row: { date: string; amount: number; category: string }) => ({
+      date: row.date,
+      amount: Number(row.amount),
+    }));
 
   return {
     initialExpenses: initialExpensesResult.data || [],
@@ -106,7 +115,7 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
   };
 }
 
-export async function getExpenses(page: number, limit: number = 20, startDate?: string, endDate?: string): Promise<Expense[]> {
+export async function getExpenses(page: number, limit: number = 20, startDate?: string, endDate?: string, category?: string): Promise<Expense[]> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -125,6 +134,7 @@ export async function getExpenses(page: number, limit: number = 20, startDate?: 
 
   if (startDate) query = query.gte('date', startDate);
   if (endDate)   query = query.lte('date', endDate);
+  if (category)  query = query.eq('category', category);
 
   const { data, error } = await query;
 

@@ -19,7 +19,7 @@ import {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { view?: string; date?: string };
+  searchParams: { view?: string; date?: string; category?: string };
 }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -28,9 +28,10 @@ export default async function Home({
     redirect('/login');
   }
 
-  // Parse URL params for view mode and date
+  // Parse URL params for view mode, date, and category filter
   const viewMode = (searchParams.view as ViewMode) || 'month';
   const selectedDate = parseDateFromParam(searchParams.date || null);
+  const activeCategory = searchParams.category || null;
 
   // Calculate date range based on view mode
   let dateRange;
@@ -42,7 +43,7 @@ export default async function Home({
     dateRange = getMonthRange(selectedDate);
   }
 
-  const dashboardData = await getDashboardData(dateRange.start, dateRange.end);
+  const dashboardData = await getDashboardData(dateRange.start, dateRange.end, activeCategory || undefined);
 
   if (!dashboardData) {
     redirect('/login');
@@ -90,6 +91,7 @@ export default async function Home({
           total={totalAmount}
           totalCount={totalCount}
           categoryStats={categoryStats}
+          activeCategory={activeCategory}
         />
 
         {/* Spending Analysis */}
@@ -97,6 +99,7 @@ export default async function Home({
           categoryStats={categoryStats}
           chartData={chartData}
           viewMode={viewMode}
+          activeCategory={activeCategory}
         />
 
         {/* Expenses List */}
@@ -146,6 +149,7 @@ export default async function Home({
             initialExpenses={initialExpenses} 
             startDate={dateRange.start}
             endDate={dateRange.end}
+            category={activeCategory}
           />
         )}
       </div>

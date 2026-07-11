@@ -2,18 +2,39 @@
 
 import { CategoryStat } from '../actions/dashboard';
 import { getCategoryDetails } from '../../lib/categories';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 
 interface SummaryCardsProps {
   total: number;
   totalCount: number;
   categoryStats: CategoryStat[];
+  activeCategory?: string | null;
 }
 
-export default function SummaryCards({ total, totalCount, categoryStats }: SummaryCardsProps) {
+export default function SummaryCards({ total, totalCount, categoryStats, activeCategory }: SummaryCardsProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const handleCategoryClick = (category: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (category === null || activeCategory === category) {
+      params.delete('category');
+    } else {
+      params.set('category', category);
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <div className="space-y-2 mb-4">
       {/* Grand Total */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg p-3 shadow-md text-white">
+      <div 
+        onClick={() => activeCategory && handleCategoryClick(null)}
+        className={`bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg p-3 shadow-md text-white select-none transition-all ${
+          activeCategory ? 'cursor-pointer hover:opacity-90 active:scale-[0.99]' : ''
+        }`}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xl">📊</span>
@@ -24,8 +45,13 @@ export default function SummaryCards({ total, totalCount, categoryStats }: Summa
               </p>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right flex flex-col items-end justify-center">
             <p className="text-xs opacity-75">{totalCount} items</p>
+            {activeCategory && (
+              <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded mt-1 font-semibold hover:bg-white/35 transition-colors">
+                Clear Filter ✕
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -55,10 +81,19 @@ export default function SummaryCards({ total, totalCount, categoryStats }: Summa
             };
             const gradient = gradientMap[cat.color] ?? gradientMap.gray;
 
+            const isSelected = activeCategory === stat.category;
+            const hasFilter = !!activeCategory;
+            const selectionStyles = hasFilter
+              ? isSelected 
+                ? 'opacity-100 ring-2 ring-white/80 ring-offset-2 ring-offset-indigo-600/10'
+                : 'opacity-40 hover:opacity-70 scale-95'
+              : 'hover:opacity-95 hover:scale-[1.01]';
+
             return (
               <div
                 key={stat.category}
-                className={`bg-gradient-to-br ${gradient} rounded-lg p-2.5 shadow-md text-white`}
+                onClick={() => handleCategoryClick(stat.category)}
+                className={`bg-gradient-to-br ${gradient} rounded-lg p-2.5 shadow-md text-white cursor-pointer active:scale-[0.98] select-none transition-all duration-200 ${selectionStyles}`}
               >
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="text-base">{cat.icon}</span>
