@@ -12,23 +12,32 @@ export interface ParsedExpense {
   merchant: string | null;
   date: string | null; // YYYY-MM-DD
   time: string | null; // HH:mm
-  is_recurring: boolean;
-  is_house: boolean;
-  is_parents: boolean;
-  is_gym: boolean;
 }
 
 const CATEGORIES = [
-  'Food & Dining', 'Groceries', 'Transport', 'Shopping', 'Electronics',
-  'Bills & Utilities', 'Entertainment', 'Health & Fitness', 'Education',
-  'Travel', 'Personal Care', 'Home & Garden', 'Gifts & Donations', 'Insurance', 'Family', 'Other'
+  'Fuel', 'Fish', 'Gym', 'Bills', 'Junk',
+  'Groceries', 'Family', 'Travel', 'Shopping',
+  'Food & Dining', 'Personal Care', 'Health', 'House',
+  'Entertainment', 'Other',
 ];
 
-const FLAG_INSTRUCTIONS = `
-    - is_recurring (boolean): true if the expense repeats (e.g., "monthly subscription", "daily coffee")
-    - is_house (boolean): true if related to house renovation, construction, painting, hardware, etc.
-    - is_parents (boolean): true if money given to/spent on parents (e.g., "sent to dad", "mom's meds"). If true, Category should usually be "Family".
-    - is_gym (boolean): true if related to gym or fitness — gym membership, supplements (protein, creatine, etc.), sports/gym equipment, or if user explicitly mentions "gym" in context.`;
+const CATEGORY_GUIDANCE = `
+Category guidance (pick the BEST match — these are mutually exclusive):
+- Fuel: petrol, diesel for any vehicle (Activa, car, Omni, Alto etc.)
+- Fish: fish market, seafood, surmai, pomfret, prawns, mackerel
+- Gym: gym membership, protein powder, supplements, eggs/paneer bought for gym, gym equipment
+- Bills: electricity, water bill, Jio/broadband recharge, LIC premium, cooking gas, rent
+- Junk: paav, mirchi paav, cold drinks, chips, samosa, snacks, street food
+- Groceries: rice, vegetables, dal, oil, milk, bread, household staples
+- Family: money given to mom/dad, parent expenses, family support
+- Travel: trips, hotel stays, long-distance fuel, tourism
+- Shopping: clothes, accessories, gadgets, gifts, personal purchases
+- Food & Dining: restaurant meals, café, takeaway, proper dining
+- Personal Care: haircut, moisturiser, face wash, cosmetics
+- Health: doctor visit, medicine, pharmacy (non-gym)
+- House: home renovation, hardware, painting, maintenance
+- Entertainment: movies, events, subscriptions (Netflix, F1 etc.), museum
+- Other: anything that doesn't clearly fit the above`;
 
 // Parse a single expense from natural language
 export async function parseExpense(text: string): Promise<ParsedExpense> {
@@ -38,17 +47,17 @@ export async function parseExpense(text: string): Promise<ParsedExpense> {
     Extract the following expense details from the user's input:
     - Amount (number)
     - Currency (always INR)
-    - Category (MUST be one of: ${CATEGORIES.join(', ')})
+    - Category (MUST be exactly one of: ${CATEGORIES.join(', ')})
     - Description (brief summary)
-    - Merchant (if applicable)
+    - Merchant (if applicable, else null)
     - Date (YYYY-MM-DD, assume current year if not specified. Today is ${today})
-    - Time (HH:mm, if specified)
-    ${FLAG_INSTRUCTIONS}
+    - Time (HH:mm, if specified, else null)
+    ${CATEGORY_GUIDANCE}
 
     User Input: "${text}"
 
-    Return ONLY a valid JSON object with keys: amount, currency, category, description, merchant, date, time, is_recurring, is_house, is_parents, is_gym.
-    IMPORTANT: The category MUST be exactly one of the predefined categories listed above.
+    Return ONLY a valid JSON object with keys: amount, currency, category, description, merchant, date, time.
+    The category MUST be exactly one of the predefined values.
     Do not add markdown formatting.
   `;
 
@@ -70,10 +79,7 @@ export async function parseExpense(text: string): Promise<ParsedExpense> {
     });
 
     const content = chatCompletion.choices[0]?.message?.content;
-    console.log('Groq Response:', content);
-
     if (!content) throw new Error('No content returned from AI');
-
     return JSON.parse(content) as ParsedExpense;
   } catch (error) {
     console.error('Error parsing expense in @repo/ai:', error);
@@ -82,8 +88,6 @@ export async function parseExpense(text: string): Promise<ParsedExpense> {
 }
 
 // Parse multiple expenses from a single natural language string.
-// Input example: "500 pizza, 180 petrol, 100 milk"
-// Returns an array — one ParsedExpense per detected item.
 export async function parseExpenses(text: string): Promise<ParsedExpense[]> {
   const today = new Date().toISOString().split('T')[0];
 
@@ -99,7 +103,7 @@ export async function parseExpenses(text: string): Promise<ParsedExpense[]> {
     - merchant (string or null)
     - date (YYYY-MM-DD — default to today: ${today} unless the user specifies otherwise)
     - time (HH:mm or null)
-    ${FLAG_INSTRUCTIONS}
+    ${CATEGORY_GUIDANCE}
 
     User Input: "${text}"
 
@@ -107,7 +111,7 @@ export async function parseExpenses(text: string): Promise<ParsedExpense[]> {
     { "items": [ { ...expense fields... }, ... ] }
 
     Rules:
-    - Each item MUST have all keys: amount, currency, category, description, merchant, date, time, is_recurring, is_house, is_parents, is_gym.
+    - Each item MUST have all keys: amount, currency, category, description, merchant, date, time.
     - Category MUST be exactly one of the predefined list.
     - Do not add markdown formatting or extra keys.
   `;
@@ -130,8 +134,6 @@ export async function parseExpenses(text: string): Promise<ParsedExpense[]> {
     });
 
     const content = chatCompletion.choices[0]?.message?.content;
-    console.log('Groq Multi-parse Response:', content);
-
     if (!content) throw new Error('No content returned from AI');
 
     const parsed = JSON.parse(content) as { items: ParsedExpense[] };

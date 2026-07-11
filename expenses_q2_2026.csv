@@ -1,0 +1,171 @@
+Date,Description,Merchant,Amount (INR),Original Category,New Category,Is Recurring
+2026-04-05,"fish","",200,"Food & Dining","fish",No
+2026-04-05,"Karnataka trip","",6000,"Travel","other",No
+2026-04-06,"LIC for father","LIC",1495,"Family","recurring(bills)",No
+2026-04-07,"real juice","",148,"Food & Dining","other",No
+2026-04-08,"omni petrol","Omni Petrol",800,"Transport","fuel",No
+2026-04-08,"Activa belt repair","",780,"Transport","other",No
+2026-04-08,"groceries vagon","vagon",218,"Groceries","other",No
+2026-04-08,"pleasure petrol","",120,"Transport","fuel",No
+2026-04-12,"Money given to father","",500,"Family","other",No
+2026-04-12,"banana","",140,"Food & Dining","other",No
+2026-04-12,"Activa petrol","",160,"Transport","fuel",No
+2026-04-12,"fish","",500,"Food & Dining","fish",No
+2026-04-12,"oranges","",100,"Groceries","other",No
+2026-04-12,"corn","",100,"Food & Dining","other",No
+2026-04-12,"coke and other snacks","",240,"Food & Dining","other",No
+2026-04-12,"petrol xtrem","",180,"Transport","fuel",No
+2026-04-12,"cold drinks","",90,"Food & Dining","other",No
+2026-04-12,"shev puri","",100,"Food & Dining","other",No
+2026-04-12,"samosa","",60,"Food & Dining","other",No
+2026-04-13,"LIC self","",1980,"Insurance","recurring(bills)",Yes
+2026-04-13,"electricity home bill","",317,"Bills & Utilities","recurring(bills)",Yes
+2026-04-14,"paid to father","",500,"Family","other",No
+2026-04-14,"dandeli trip","",1500,"Travel","other",No
+2026-04-14,"dew and chakri","",110,"Food & Dining","other",No
+2026-04-15,"petrol omni","",500,"Transport","fuel",No
+2026-04-15,"water bill","",173,"Bills & Utilities","recurring(bills)",No
+2026-04-17,"mom recharge","",189,"Family","recurring(bills)",No
+2026-04-17,"fish","",100,"Food & Dining","fish",No
+2026-04-19,"fish","",250,"Food & Dining","fish",No
+2026-04-19,"Activa petrol","",160,"Transport","fuel",No
+2026-04-19,"Parvati grocery","Parvati",2619,"Groceries","other",No
+2026-04-19,"wedding shopping","",3106,"Shopping","other",No
+2026-04-19,"vada paav","",104,"Food & Dining","other",No
+2026-04-19,"cold drinks","",180,"Food & Dining","other",No
+2026-04-19,"petrol activa","",160,"Transport","fuel",No
+2026-04-19,"money given to mom","",500,"Family","other",No
+2026-04-19,"belt","",170,"Shopping","other",No
+2026-04-20,"omni petrol","Omni Petrol",800,"Transport","fuel",No
+2026-04-20,"cat food","",200,"Others","other",No
+2026-04-22,"petrol for alto","",600,"Transport","fuel",No
+2026-04-22,"Vaibhav wedding","",1000,"Gifts & Donations","other",No
+2026-04-22,"money for mom","",1000,"Family","other",No
+2026-04-22,"biscuits","",150,"Groceries","other",No
+2026-04-22,"Activa petrol","",160,"Transport","fuel",No
+2026-04-22,"milk","",35,"Groceries","milk",No
+2026-04-22,"rice","",1280,"Groceries","other",No
+2026-04-23,"Bicholim restaurant","Bicholim restaurant",434,"Food & Dining","other",No
+2026-04-26,"fish","",1000,"Food & Dining","fish",No
+2026-04-26,"Karwar juice","",335,"Food & Dining","other",No
+2026-04-26,"restaurant","",760,"Food & Dining","other",No
+2026-04-26,"museum ticket","",250,"Entertainment","other",No
+2026-04-26,"hotel","hotel",70,"Travel","other",No
+2026-05-02,"dandeli trip","",820,"Travel","other",No
+2026-05-02,"omni tyres","",6200,"Transport","other",No
+2026-05-03,"ram wedding","",1000,"Other","other",No
+2026-05-03,"car petrol","didi",900,"Transport","fuel",No
+2026-05-07,"money for mom","",2000,"Family","other",No
+2026-05-07,"lip balm","",669,"Personal Care","other",No
+2026-05-08,"Chandresh wedding gift","",2400,"Gifts & Donations","other",No
+2026-05-09,"urrak","",200,"Other","other",No
+2026-05-09,"Blinkit purchase","Blinkit",175,"Groceries","other",No
+2026-05-09,"Cetaphil cleanser","",260,"Personal Care","other",No
+2026-05-09,"omni petrol","Omni",800,"Transport","fuel",No
+2026-05-10,"both weddings","",6000,"Other","other",No
+2026-05-10,"Activa petrol","",180,"Transport","fuel",No
+2026-05-10,"fish","",370,"Food & Dining","fish",No
+2026-05-10,"refreshment","",60,"Food & Dining","other",No
+2026-05-12,"petrol","pramod",400,"Transport","fuel",No
+2026-05-14,"Pramod wedding","",6000,"Family","other",No
+2026-05-14,"pramod wedding","",1500,"Other","other",No
+2026-05-14,"money given to mom","",200,"Family","other",No
+2026-05-15,"petrol activa","",120,"Transport","fuel",No
+2026-05-15,"patteice","",70,"Food & Dining","other",No
+2026-05-15,"jio bill","Jio",411,"Bills & Utilities","recurring(bills)",Yes
+2026-05-17,"Activa petrol","",160,"Transport","fuel",No
+2026-05-17,"money given to mom","",1500,"Family","other",No
+2026-05-17,"fish","",320,"Food & Dining","fish",No
+2026-05-19,"moisturiser","",256,"Personal Care","other",No
+2026-05-19,"Parvati super store","Parvati super store",1204,"Groceries","other",No
+2026-05-20,"rice","",1350,"Groceries","other",No
+2026-05-20,"milk plus ice cream","",74,"Groceries","milk",No
+2026-05-20,"milk plus ice cream","",74,"Groceries","milk",No
+2026-05-21,"papa recharge","",199,"Family","recurring(bills)",No
+2026-05-23,"omni petrol","Omni",700,"Transport","fuel",No
+2026-05-23,"birthday chocolates","",145,"Gifts & Donations","other",No
+2026-05-24,"vagon groceries","vagon",355,"Groceries","other",No
+2026-05-24,"electricity bill","",550,"Bills & Utilities","recurring(bills)",Yes
+2026-05-24,"activa petrol","",300,"Transport","fuel",No
+2026-05-25,"given to mom","",1300,"Family","other",No
+2026-05-25,"gym clothes","",1660,"Shopping","other",No
+2026-05-26,"activa petrol","",120,"Transport","fuel",No
+2026-05-26,"samosa","",60,"Food & Dining","other",No
+2026-05-30,"Money given to father","",500,"Family","other",No
+2026-05-30,"biscuit bread","",140,"Groceries","other",No
+2026-05-30,"Activa petrol","",160,"Transport","fuel",No
+2026-05-30,"Activa petrol","",160,"Transport","fuel",No
+2026-05-30,"falooda","",30,"Food & Dining","other",No
+2026-05-31,"Activa petrol","qctiva",120,"Transport","fuel",No
+2026-05-31,"mirchi paav","",96,"Food & Dining","other",No
+2026-05-31,"fish","",450,"Food & Dining","fish",No
+2026-06-01,"hair","",100,"Other","other",No
+2026-06-01,"activa petrol","",120,"Transport","fuel",No
+2026-06-01,"samosa","",60,"Food & Dining","other",No
+2026-06-04,"Money given to father","",500,"Family","other",No
+2026-06-04,"face wash","",300,"Personal Care","other",No
+2026-06-06,"omni petrol","omni",700,"Transport","fuel",No
+2026-06-06,"gym membership","",2200,"Health & Fitness","recurring(bills)",Yes
+2026-06-06,"Activa petrol","",160,"Transport","fuel",No
+2026-06-06,"biscuits","",150,"Groceries","other",No
+2026-06-06,"peanut butter","",419,"Groceries","other",No
+2026-06-07,"Fish","",400,"Groceries","fish",No
+2026-06-08,"milk","",58,"Groceries","milk",No
+2026-06-08,"banana mushroom","",110,"Groceries","other",No
+2026-06-08,"given to mom","",9500,"Family","other",No
+2026-06-10,"eggs for gym","",40,"Groceries","other",No
+2026-06-10,"mirchi paav","",60,"Food & Dining","other",No
+2026-06-10,"Petrol for Activa to gym","",180,"Transport","fuel",No
+2026-06-10,"milk","",80,"Groceries","milk",No
+2026-06-11,"mom recharge","",189,"Family","recurring(bills)",No
+2026-06-12,"tap bill","",209,"Bills & Utilities","recurring(bills)",No
+2026-06-13,"activa petrol","",180,"Transport","fuel",No
+2026-06-13,"mama snacks","",180,"Groceries","other",No
+2026-06-14,"birthday cake","",550,"Entertainment","other",No
+2026-06-14,"milk","",70,"Groceries","milk",No
+2026-06-14,"bread","",45,"Groceries","other",No
+2026-06-14,"Activa petrol","",180,"Transport","fuel",No
+2026-06-15,"cooking gas","",956,"Bills & Utilities","recurring(bills)",No
+2026-06-18,"milk","",60,"Groceries","milk",No
+2026-06-18,"paneer gym","",100,"Health & Fitness","other",No
+2026-06-18,"petrol activa","",160,"Transport","fuel",No
+2026-06-20,"home electricity bill","",491,"Bills & Utilities","recurring(bills)",No
+2026-06-20,"pump electricity bill","",240,"Bills & Utilities","recurring(bills)",No
+2026-06-20,"banana","",60,"Food & Dining","other",No
+2026-06-20,"Activa petrol","",180,"Transport","fuel",No
+2026-06-20,"milk","",68,"Groceries","milk",No
+2026-06-20,"mosquito repellent","",87,"Home & Garden","other",No
+2026-06-20,"eggs gym","",45,"Health & Fitness","other",No
+2026-06-20,"fish","",200,"Groceries","fish",No
+2026-06-20,"jio recharge","",411,"Bills & Utilities","recurring(bills)",No
+2026-06-21,"Reshab wedding","",1000,"Other","other",No
+2026-06-23,"Money given to father","",500,"Family","other",No
+2026-06-23,"fish","",100,"Food & Dining","fish",No
+2026-06-23,"activa petrol","",160,"Transport","fuel",No
+2026-06-23,"milk","",60,"Groceries","milk",No
+2026-06-23,"paneer gym","",100,"Health & Fitness","other",No
+2026-06-24,"mirchi paav","",32,"Groceries","other",No
+2026-06-24,"soyabean and nuts","",55,"Groceries","other",No
+2026-06-24,"biscuit","",20,"Groceries","other",No
+2026-06-24,"milk","",60,"Groceries","milk",No
+2026-06-24,"paneer gym","",100,"Health & Fitness","other",No
+2026-06-24,"eggs gym","",57,"Health & Fitness","other",No
+2026-06-24,"vegetables","",70,"Groceries","other",No
+2026-06-24,"activa petrol","",180,"Transport","fuel",No
+2026-06-25,"biscuit","",140,"Food & Dining","other",No
+2026-06-25,"medicine","",471,"Health & Fitness","other",No
+2026-06-25,"doctor","",300,"Health & Fitness","other",No
+2026-06-26,"fish","",100,"Food & Dining","fish",No
+2026-06-26,"cloth soap","",60,"Personal Care","other",No
+2026-06-26,"milk","",58,"Groceries","milk",No
+2026-06-26,"eggs gym","",50,"Health & Fitness","other",No
+2026-06-26,"rice","",1450,"Groceries","other",No
+2026-06-27,"LIC payment","",1980,"Bills & Utilities","recurring(bills)",Yes
+2026-06-27,"Omni petrol","Omni",800,"Transport","fuel",No
+2026-06-27,"sent to mom","",1000,"Family","other",No
+2026-06-27,"sent to father","",500,"Family","other",No
+2026-06-28,"biscuit and colgate","",320,"Groceries","other",No
+2026-06-28,"paav","",30,"Food & Dining","other",No
+2026-06-28,"fish","",400,"Food & Dining","fish",No
+2026-06-29,"paav","",20,"Food & Dining","other",No
+2026-06-29,"gym expenses","",160,"Health & Fitness","other",No

@@ -36,11 +36,6 @@ export type ExpenseData = {
   merchant?: string | null;
   date: string;
   time?: string | null;
-  is_recurring?: boolean;
-  recurrence_period?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
-  is_house?: boolean;
-  is_parents?: boolean;
-  is_gym?: boolean;
 };
 
 export async function saveExpenseAction(data: ExpenseData) {
@@ -60,12 +55,7 @@ export async function saveExpenseAction(data: ExpenseData) {
     merchant: data.merchant,
     date: data.date,
     time: data.time,
-    is_synced: true, // Assuming online save for now
-    is_recurring: data.is_recurring || false,
-    recurrence_period: data.recurrence_period || null,
-    is_house: data.is_house || false,
-    is_parents: data.is_parents || false,
-    is_gym: data.is_gym || false,
+    is_synced: true,
   });
 
   if (error) {
@@ -73,7 +63,7 @@ export async function saveExpenseAction(data: ExpenseData) {
     throw new Error('Failed to save expense');
   }
 
-  redirect('/'); // Redirect to dashboard after save
+  redirect('/');
 }
 
 // Save multiple expenses in a single DB round-trip.
@@ -94,11 +84,6 @@ export async function saveBulkExpensesAction(items: ExpenseData[]) {
     date: data.date,
     time: data.time ?? null,
     is_synced: true,
-    is_recurring: data.is_recurring || false,
-    recurrence_period: data.recurrence_period || null,
-    is_house: data.is_house || false,
-    is_parents: data.is_parents || false,
-    is_gym: data.is_gym || false,
   }));
 
   const { error } = await supabase.from('expenses').insert(rows);
@@ -130,11 +115,6 @@ export async function saveExpenseForSync(data: ExpenseData) {
     date: data.date,
     time: data.time,
     is_synced: true,
-    is_recurring: data.is_recurring || false,
-    recurrence_period: data.recurrence_period || null,
-    is_house: data.is_house || false,
-    is_parents: data.is_parents || false,
-    is_gym: data.is_gym || false,
   });
 
   if (error) {
@@ -142,9 +122,7 @@ export async function saveExpenseForSync(data: ExpenseData) {
     throw new Error('Failed to save expense: ' + error.message);
   }
 
-  // Revalidate the home page cache
   revalidatePath('/');
-  
   return { success: true };
 }
 
@@ -156,7 +134,6 @@ export async function deleteExpenseAction(id: string) {
     throw new Error('User not authenticated');
   }
 
-  // First verify the expense belongs to the user
   const { data: expense } = await supabase
     .from('expenses')
     .select('user_id')
@@ -188,7 +165,6 @@ export async function updateExpenseAction(id: string, data: ExpenseData) {
     throw new Error('User not authenticated');
   }
 
-  // First verify the expense belongs to the user
   const { data: expense } = await supabase
     .from('expenses')
     .select('user_id')
@@ -209,11 +185,6 @@ export async function updateExpenseAction(id: string, data: ExpenseData) {
       merchant: data.merchant,
       date: data.date,
       time: data.time,
-      is_recurring: data.is_recurring || false,
-      recurrence_period: data.recurrence_period || null,
-      is_house: data.is_house || false,
-      is_parents: data.is_parents || false,
-      is_gym: data.is_gym || false,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id);

@@ -1,38 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChartData } from '../actions/dashboard';
+import { ChartData, CategoryStat } from '../actions/dashboard';
 import ExpensesPieChart from './ExpensesPieChart';
 import ExpensesBarChart from './ExpensesBarChart';
 
 interface ExpensesAnalysisProps {
-  regularTotal: number;
-  recurringTotal: number;
-  houseTotal: number;
-  parentsTotal: number;
-  gymTotal: number;
+  categoryStats: CategoryStat[];
   chartData: ChartData[];
   viewMode?: 'month' | 'week' | 'day';
 }
 
 export default function ExpensesAnalysis({
-  regularTotal,
-  recurringTotal,
-  houseTotal,
-  parentsTotal,
-  gymTotal,
+  categoryStats,
   chartData,
   viewMode = 'month',
 }: ExpensesAnalysisProps) {
   const [isOpen, setIsOpen] = useState(false);
-  // Default to pie chart for day view, bar chart for others
-  const [chartType, setChartType] = useState<'pie' | 'bar'>(viewMode === 'day' ? 'pie' : 'pie');
+  const [chartType, setChartType] = useState<'pie' | 'bar'>('pie');
 
-  // Update chart type when view mode changes
   useEffect(() => {
-    if (viewMode === 'day') {
-      setChartType('pie');
-    }
+    if (viewMode === 'day') setChartType('pie');
   }, [viewMode]);
 
   return (
@@ -41,7 +29,7 @@ export default function ExpensesAnalysis({
         <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <span>📈</span> Spending Analysis
         </h2>
-        
+
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors flex items-center gap-1"
@@ -93,13 +81,7 @@ export default function ExpensesAnalysis({
           </div>
 
           {chartType === 'pie' ? (
-            <ExpensesPieChart
-              regularTotal={regularTotal}
-              recurringTotal={recurringTotal}
-              houseTotal={houseTotal}
-              parentsTotal={parentsTotal}
-              gymTotal={gymTotal}
-            />
+            <ExpensesPieChart categoryStats={categoryStats} />
           ) : (
             <ExpensesBarChart expenses={chartData} />
           )}

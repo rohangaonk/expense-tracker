@@ -1,39 +1,18 @@
 'use client';
 
-interface SummaryCardsProps {
-  recurring: number;
-  houseTotal: number;
-  parentsTotal: number;
-  gymTotal: number;
-  regularTotal: number;
+import { CategoryStat } from '../actions/dashboard';
+import { getCategoryDetails } from '../../lib/categories';
 
+interface SummaryCardsProps {
   total: number;
-  recurringCount: number;
-  houseCount: number;
-  parentsCount: number;
-  gymCount: number;
-  regularCount: number;
-  nonRecurringCount: number;
+  totalCount: number;
+  categoryStats: CategoryStat[];
 }
 
-export default function SummaryCards({ 
-  recurring, 
-  houseTotal,
-  parentsTotal,
-  gymTotal,
-  regularTotal,
-
-  total,
-  recurringCount,
-  houseCount,
-  parentsCount,
-  gymCount,
-  regularCount,
-  nonRecurringCount 
-}: SummaryCardsProps) {
+export default function SummaryCards({ total, totalCount, categoryStats }: SummaryCardsProps) {
   return (
     <div className="space-y-2 mb-4">
-      {/* Grand Total - Most Important */}
+      {/* Grand Total */}
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg p-3 shadow-md text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -46,73 +25,54 @@ export default function SummaryCards({
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs opacity-75">{recurringCount + nonRecurringCount} items</p>
+            <p className="text-xs opacity-75">{totalCount} items</p>
           </div>
         </div>
       </div>
 
-      {/* Recurring & One-time in a row */}
-      <div className="grid grid-cols-2 gap-2">
-        {/* Recurring */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-2.5 shadow-md text-white">
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-base">🔄</span>
-            <p className="text-xs opacity-90">Recurring</p>
-          </div>
-          <p className="text-lg font-bold leading-tight">
-            ₹{recurring.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-          </p>
-          <p className="text-xs opacity-75 mt-0.5">{recurringCount} items</p>
-        </div>
+      {/* Per-category cards — dynamic grid */}
+      {categoryStats.length > 0 && (
+        <div className="grid grid-cols-2 gap-2">
+          {categoryStats.map((stat) => {
+            const cat = getCategoryDetails(stat.category);
+            // Pick gradient based on the category color token
+            const gradientMap: Record<string, string> = {
+              amber:  'from-amber-500  to-amber-600',
+              cyan:   'from-cyan-500   to-cyan-600',
+              green:  'from-green-500  to-emerald-600',
+              red:    'from-red-500    to-red-600',
+              orange: 'from-orange-500 to-orange-600',
+              lime:   'from-lime-500   to-lime-600',
+              indigo: 'from-indigo-500 to-indigo-600',
+              sky:    'from-sky-500    to-sky-600',
+              purple: 'from-purple-500 to-purple-600',
+              rose:   'from-rose-500   to-rose-600',
+              pink:   'from-pink-500   to-pink-600',
+              teal:   'from-teal-500   to-teal-600',
+              stone:  'from-stone-500  to-stone-600',
+              violet: 'from-violet-500 to-violet-600',
+              gray:   'from-gray-500   to-gray-600',
+            };
+            const gradient = gradientMap[cat.color] ?? gradientMap.gray;
 
-        {/* Regular (One-time minus special cats) */}
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-2.5 shadow-md text-white">
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-base">💰</span>
-            <p className="text-xs opacity-90">Regular</p>
-          </div>
-          <p className="text-lg font-bold leading-tight">
-            ₹{regularTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-          </p>
-          <p className="text-xs opacity-75 mt-0.5">{regularCount} items</p>
+            return (
+              <div
+                key={stat.category}
+                className={`bg-gradient-to-br ${gradient} rounded-lg p-2.5 shadow-md text-white`}
+              >
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-base">{cat.icon}</span>
+                  <p className="text-xs opacity-90">{stat.category}</p>
+                </div>
+                <p className="text-lg font-bold leading-tight">
+                  ₹{stat.total_amount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                </p>
+                <p className="text-xs opacity-75 mt-0.5">{stat.expense_count} items</p>
+              </div>
+            );
+          })}
         </div>
-
-        {/* House */}
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-2.5 shadow-md text-white">
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-base">🏠</span>
-            <p className="text-xs opacity-90">House</p>
-          </div>
-          <p className="text-lg font-bold leading-tight">
-            ₹{houseTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-          </p>
-          <p className="text-xs opacity-75 mt-0.5">{houseCount} items</p>
-        </div>
-
-        {/* Parents */}
-        <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg p-2.5 shadow-md text-white">
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-base">👪</span>
-            <p className="text-xs opacity-90">Parents</p>
-          </div>
-          <p className="text-lg font-bold leading-tight">
-            ₹{parentsTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-          </p>
-          <p className="text-xs opacity-75 mt-0.5">{parentsCount} items</p>
-        </div>
-
-        {/* Gym */}
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg p-2.5 shadow-md text-white">
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-base">💪</span>
-            <p className="text-xs opacity-90">Gym</p>
-          </div>
-          <p className="text-lg font-bold leading-tight">
-            ₹{gymTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-          </p>
-          <p className="text-xs opacity-75 mt-0.5">{gymCount} items</p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

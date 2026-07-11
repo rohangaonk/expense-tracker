@@ -6,6 +6,7 @@ import { deleteExpenseAction } from '../actions/expense';
 import { useConfirmDialog } from '@/components/ConfirmDialogProvider';
 import { useToast } from '@/components/ToastProvider';
 import { Expense } from '../actions/dashboard';
+import { getCategoryDetails } from '../../lib/categories';
 
 export default function ExpenseCard({ expense }: { expense: Expense }) {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -47,28 +48,8 @@ export default function ExpenseCard({ expense }: { expense: Expense }) {
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 pl-11">
-             {expense.is_recurring && (
-               <span className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-medium">
-                 🔄 Recurring
-               </span>
-             )}
-             {expense.is_house && (
-               <span className="flex items-center gap-1 bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 rounded text-[10px] font-medium">
-                 🏠 House
-               </span>
-             )}
-             {expense.is_parents && (
-               <span className="flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded text-[10px] font-medium">
-                 👪 Parents
-               </span>
-             )}
-             {expense.is_gym && (
-               <span className="flex items-center gap-1 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded text-[10px] font-medium">
-                 💪 Gym
-               </span>
-             )}
             {expense.merchant && <span>{expense.merchant}</span>}
-            {(expense.merchant || expense.is_recurring) && <span>•</span>}
+            {expense.merchant && <span>•</span>}
             <span>
               {new Date(expense.date).toLocaleDateString('en-IN', {
                 month: 'short',
@@ -112,24 +93,5 @@ export default function ExpenseCard({ expense }: { expense: Expense }) {
 }
 
 function getCategoryIcon(category: string) {
-  // Simple mapping, can be improved or imported from a shared constant
-  const icons: Record<string, string> = {
-    'Food': '🍔',
-    'Transport': '🚕',
-    'Shopping': '🛍️',
-    'Entertainment': '🎬',
-    'Health': '🏥',
-    'Bills': '🧾',
-    'Education': '📚',
-    'Travel': '✈️',
-    'Investment': '📈',
-    'Rent': '🏠',
-    'Salary': '💰',
-    'Gifts': '🎁',
-    'Others': '📝',
-    'House': '🏡',
-    'Parents': '👨‍👩‍👧',
-    'Family': '👨‍👩‍👧',
-  };
-  return icons[category] || '📝';
+  return getCategoryDetails(category).icon;
 }

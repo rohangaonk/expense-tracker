@@ -15,7 +15,6 @@ export default function ExpenseList({ initialExpenses, startDate, endDate }: Exp
   const [page, setPage] = useState(2); // Start fetching from page 2
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialExpenses.length >= 20);
-  const [gymOnly, setGymOnly] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
 
   // Reset state when filters change
@@ -66,11 +65,6 @@ export default function ExpenseList({ initialExpenses, startDate, endDate }: Exp
     };
   }, [loadMore, hasMore]);
 
-  const displayedExpenses = gymOnly
-    ? expenses.filter(e => e.is_gym)
-    : expenses;
-
-  const gymExpenseCount = expenses.filter(e => e.is_gym).length;
 
   return (
     <div className="space-y-4">
@@ -78,43 +72,21 @@ export default function ExpenseList({ initialExpenses, startDate, endDate }: Exp
         <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
           Recent Expenses
         </h2>
-
-        {/* Gym Filter Chip */}
-        <button
-          onClick={() => setGymOnly(prev => !prev)}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-            gymOnly
-              ? 'bg-green-500 text-white shadow-sm shadow-green-200 dark:shadow-green-900/40 scale-105'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-400 border border-gray-200 dark:border-gray-700'
-          }`}
-          title={gymOnly ? 'Show all expenses' : 'Show gym expenses only'}
-        >
-          <span>💪</span>
-          Gym
-          {gymExpenseCount > 0 && (
-            <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold ${
-              gymOnly ? 'bg-white/30 text-white' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400'
-            }`}>
-              {gymExpenseCount}
-            </span>
-          )}
-        </button>
       </div>
       
       <div className="space-y-3">
-        {displayedExpenses.length === 0 ? (
+        {expenses.length === 0 ? (
           <div className="text-center py-10 text-sm text-gray-400 dark:text-gray-600">
-            {gymOnly ? 'No gym expenses in this period' : 'No expenses'}
+            No expenses
           </div>
         ) : (
-          displayedExpenses.map((expense) => (
+          expenses.map((expense) => (
             <ExpenseCard key={expense.id} expense={expense} />
           ))
         )}
       </div>
 
-      {/* Loading Sentinel — only show when not filtering */}
-      {!gymOnly && (hasMore || loading) && (
+      {(hasMore || loading) && (
         <div 
           ref={observerTarget} 
           className="h-20 flex items-center justify-center p-4"
@@ -129,7 +101,7 @@ export default function ExpenseList({ initialExpenses, startDate, endDate }: Exp
         </div>
       )}
       
-      {!gymOnly && !hasMore && expenses.length > 0 && (
+      {!hasMore && expenses.length > 0 && (
         <div className="text-center py-6 text-xs text-gray-400 dark:text-gray-600">
           No more expenses
         </div>

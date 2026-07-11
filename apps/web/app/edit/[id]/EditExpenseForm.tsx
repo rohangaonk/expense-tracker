@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { updateExpenseAction, type ExpenseData } from '@/app/actions/expense';
+import { EXPENSE_CATEGORIES } from '@/lib/categories';
 import Link from 'next/link';
 
 interface EditExpenseFormProps {
@@ -15,18 +16,13 @@ interface EditExpenseFormProps {
     merchant: string | null;
     date: string;
     time: string | null;
-    is_recurring: boolean;
-    recurrence_period: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
-    is_house?: boolean;
-    is_parents?: boolean;
-    is_gym?: boolean;
   };
 }
 
 export default function EditExpenseForm({ expense }: EditExpenseFormProps) {
   const [isSaving, setIsSaving] = useState(false);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<ExpenseData>({
+  const { register, handleSubmit, formState: { errors } } = useForm<ExpenseData>({
     defaultValues: {
       amount: expense.amount,
       currency: expense.currency,
@@ -35,15 +31,8 @@ export default function EditExpenseForm({ expense }: EditExpenseFormProps) {
       merchant: expense.merchant,
       date: expense.date,
       time: expense.time,
-      is_recurring: expense.is_recurring,
-      recurrence_period: expense.recurrence_period,
-      is_house: expense.is_house || false,
-      is_parents: expense.is_parents || false,
-      is_gym: expense.is_gym || false,
     },
   });
-
-  const isRecurring = watch('is_recurring');
 
   const onSubmit = async (data: ExpenseData) => {
     setIsSaving(true);
@@ -81,12 +70,16 @@ export default function EditExpenseForm({ expense }: EditExpenseFormProps) {
 
           <div className="space-y-1">
             <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Category</label>
-            <input
-              type="text"
+            <select
               {...register('category', { required: true })}
               className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="Food, Travel, etc."
-            />
+            >
+              {EXPENSE_CATEGORIES.map(c => (
+                <option key={c.name} value={c.name}>
+                  {c.icon} {c.name}
+                </option>
+              ))}
+            </select>
             {errors.category && <span className="text-red-500 text-xs">Required</span>}
           </div>
 
@@ -120,81 +113,6 @@ export default function EditExpenseForm({ expense }: EditExpenseFormProps) {
               />
             </div>
           </div>
-
-          {/* Special Flags */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="flex items-center gap-3 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-              <input
-                type="checkbox"
-                id="is_house"
-                {...register('is_house')}
-                className="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
-              />
-              <label htmlFor="is_house" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
-                <span className="text-lg">🏠</span>
-                House
-              </label>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
-              <input
-                type="checkbox"
-                id="is_parents"
-                {...register('is_parents')}
-                className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <label htmlFor="is_parents" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
-                <span className="text-lg">👪</span>
-                Parents
-              </label>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-              <input
-                type="checkbox"
-                id="is_gym"
-                {...register('is_gym')}
-                className="w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500"
-              />
-              <label htmlFor="is_gym" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
-                <span className="text-lg">💪</span>
-                Gym
-              </label>
-            </div>
-          </div>
-
-          {/* Recurring Expense Toggle */}
-          <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-            <input
-              type="checkbox"
-              id="is_recurring"
-              {...register('is_recurring')}
-              className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="is_recurring" className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
-              <span className="text-lg">🔄</span>
-              Mark as recurring expense
-            </label>
-          </div>
-
-          {/* Recurrence Period (shown only if recurring is checked) */}
-          {isRecurring && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Recurrence Period
-              </label>
-              <select
-                {...register('recurrence_period')}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Select period...</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
-            </div>
-          )}
 
           <button
             type="submit"

@@ -12,15 +12,10 @@ import VoiceButton from '../components/VoiceButton';
 import { useToast } from '../../components/ToastProvider';
 import { ParsedExpense } from '@repo/ai';
 
-// ---------------------------------------------------------------------------
-// Categories
-// ---------------------------------------------------------------------------
-const CATEGORIES = [
-  'Food & Dining', 'Groceries', 'Transport', 'Shopping', 'Electronics',
-  'Bills & Utilities', 'Entertainment', 'Health & Fitness', 'Education',
-  'Travel', 'Personal Care', 'Home & Garden', 'Gifts & Donations',
-  'Insurance', 'Family', 'Other',
-];
+import { EXPENSE_CATEGORIES } from '../../lib/categories';
+
+const CATEGORIES = EXPENSE_CATEGORIES.map(c => c.name);
+
 
 // ---------------------------------------------------------------------------
 // ReviewItem — an editable parsed expense card
@@ -59,10 +54,6 @@ function ReviewItem({ item, index, onChange, onRemove }: ReviewItemProps) {
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
               {item.category} • {item.date}
-              {item.is_recurring && ' • 🔄'}
-              {item.is_gym && ' • 💪'}
-              {item.is_parents && ' • 👪'}
-              {item.is_house && ' • 🏠'}
             </p>
           </div>
 
@@ -161,29 +152,6 @@ function ReviewItem({ item, index, onChange, onRemove }: ReviewItemProps) {
             </div>
           </div>
 
-          {/* Row 4: Flags */}
-          <div className="flex flex-wrap gap-2 pt-1">
-            {([
-              ['is_recurring', '🔄', 'Recurring', 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300'],
-              ['is_house',     '🏠', 'House',     'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300'],
-              ['is_parents',   '👪', 'Parents',   'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300'],
-              ['is_gym',       '💪', 'Gym',       'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'],
-            ] as [keyof ParsedExpense, string, string, string][]).map(([key, emoji, label, activeClass]) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => field(key, !item[key])}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${
-                  item[key]
-                    ? activeClass
-                    : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
-                }`}
-              >
-                {emoji} {label}
-              </button>
-            ))}
-          </div>
-
           {/* Done button */}
           <div className="flex justify-end pt-1">
             <button
@@ -214,10 +182,6 @@ function blankItem(): ParsedExpense & { _id: string } {
     merchant: null,
     date: today,
     time: null,
-    is_recurring: false,
-    is_house: false,
-    is_parents: false,
-    is_gym: false,
   };
 }
 
@@ -301,11 +265,6 @@ export default function AddExpensePage() {
         merchant: it.merchant ?? null,
         date: it.date ?? today,
         time: it.time ?? null,
-        is_recurring: it.is_recurring,
-        recurrence_period: null,
-        is_house: it.is_house,
-        is_parents: it.is_parents,
-        is_gym: it.is_gym,
       }));
 
       if (navigator.onLine) {

@@ -49,22 +49,14 @@ export default async function Home({
     redirect('/login');
   }
 
-  const { 
-    initialExpenses, 
-    totalAmount, 
-    recurringTotal, 
-    houseTotal,
-    parentsTotal,
-    gymTotal,
-    regularTotal,
-    recurringCount,
-    houseCount,
-    parentsCount,
-    gymCount,
-    regularCount,
-    nonRecurringCount,
-    chartData
+  const {
+    initialExpenses,
+    totalAmount,
+    categoryStats,
+    chartData,
   } = dashboardData;
+
+  const totalCount = categoryStats.reduce((sum, s) => sum + s.expense_count, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-black dark:to-gray-950 p-4 pb-24">
@@ -97,27 +89,14 @@ export default async function Home({
 
         {/* Summary Cards */}
         <SummaryCards
-          recurring={recurringTotal}
-          houseTotal={houseTotal}
-          parentsTotal={parentsTotal}
-          gymTotal={gymTotal}
-          regularTotal={regularTotal}
           total={totalAmount}
-          recurringCount={recurringCount}
-          houseCount={houseCount}
-          parentsCount={parentsCount}
-          gymCount={gymCount}
-          regularCount={regularCount}
-          nonRecurringCount={nonRecurringCount}
+          totalCount={totalCount}
+          categoryStats={categoryStats}
         />
 
         {/* Spending Analysis */}
         <ExpensesAnalysis
-          regularTotal={regularTotal}
-          recurringTotal={recurringTotal}
-          houseTotal={houseTotal}
-          parentsTotal={parentsTotal}
-          gymTotal={gymTotal}
+          categoryStats={categoryStats}
           chartData={chartData}
           viewMode={viewMode}
         />

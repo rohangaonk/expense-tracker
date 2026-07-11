@@ -12,11 +12,6 @@ export interface Expense {
   date: string;
   time: string | null;
   created_at: string;
-  is_recurring: boolean;
-  recurrence_period: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
-  is_house?: boolean;
-  is_parents?: boolean;
-  is_gym?: boolean;
 }
 
 export interface ChartData {
@@ -24,23 +19,16 @@ export interface ChartData {
   amount: number;
 }
 
+export interface CategoryStat {
+  category: string;
+  total_amount: number;
+  expense_count: number;
+}
+
 export interface DashboardData {
   initialExpenses: Expense[];
   totalAmount: number;
-  recurringTotal: number;
-  houseTotal: number;
-  parentsTotal: number;
-  gymTotal: number;
-  regularTotal: number;
-  nonRecurringTotal: number;
-  // Counts
-  recurringCount: number;
-  houseCount: number;
-  parentsCount: number;
-  gymCount: number;
-  regularCount: number;
-  nonRecurringCount: number;
-  // chartData replaces expenses for analysis
+  categoryStats: CategoryStat[];
   chartData: ChartData[];
 }
 
@@ -52,23 +40,22 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
     return null;
   }
 
-  // Use parallel queries for better performance
   const [statsResult, chartDataResult, initialExpensesResult] = await Promise.all([
-    // Query 1: Get aggregated stats from database function
+    // Query 1: Per-category stats via RPC
     supabase.rpc('get_expense_stats', {
       p_user_id: user.id,
       p_start_date: startDate || null,
-      p_end_date: endDate || null
+      p_end_date: endDate || null,
     }),
-    
-    // Query 2: Get minimal chart data
+
+    // Query 2: Chart data
     supabase.rpc('get_chart_data', {
       p_user_id: user.id,
       p_start_date: startDate || null,
-      p_end_date: endDate || null
+      p_end_date: endDate || null,
     }),
-    
-    // Query 3: Get initial 20 expenses for display
+
+    // Query 3: First 20 expenses for display
     (async () => {
       let query = supabase
         .from('expenses')
@@ -78,71 +65,43 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
         .order('created_at', { ascending: false })
         .limit(20);
 
-      if (startDate) {
-        query = query.gte('date', startDate);
-      }
-      if (endDate) {
-        query = query.lte('date', endDate);
-      }
+      if (startDate) query = query.gte('date', startDate);
+      if (endDate)   query = query.lte('date', endDate);
 
       return await query;
-    })()
+    })(),
   ]);
 
-  // Handle errors
   if (statsResult.error) {
     console.error('Error fetching stats:', statsResult.error);
     throw new Error('Failed to fetch expense stats');
   }
-
   if (chartDataResult.error) {
     console.error('Error fetching chart data:', chartDataResult.error);
     throw new Error('Failed to fetch chart data');
   }
-
   if (initialExpensesResult.error) {
     console.error('Error fetching initial expenses:', initialExpensesResult.error);
     throw new Error('Failed to fetch initial expenses');
   }
 
-  // Extract stats (RPC returns array with single row)
-  const stats = statsResult.data?.[0] || {
-    total_amount: 0,
-    recurring_total: 0,
-    recurring_count: 0,
-    house_total: 0,
-    house_count: 0,
-    parents_total: 0,
-    parents_count: 0,
-    gym_total: 0,
-    gym_count: 0,
-    regular_total: 0,
-    regular_count: 0,
-    non_recurring_total: 0,
-    non_recurring_count: 0
-  };
+  const categoryStats: CategoryStat[] = (statsResult.data || []).map((row: any) => ({
+    category:      row.category,
+    total_amount:  Number(row.total_amount),
+    expense_count: Number(row.expense_count),
+  }));
 
-  // Convert chart data
+  const totalAmount = categoryStats.reduce((sum, s) => sum + s.total_amount, 0);
+
   const chartData: ChartData[] = (chartDataResult.data || []).map((row: { date: string; amount: number }) => ({
     date: row.date,
-    amount: row.amount
+    amount: row.amount,
   }));
 
   return {
     initialExpenses: initialExpensesResult.data || [],
-    totalAmount: Number(stats.total_amount),
-    recurringTotal: Number(stats.recurring_total),
-    houseTotal: Number(stats.house_total),
-    parentsTotal: Number(stats.parents_total),
-    gymTotal: Number(stats.gym_total),
-    regularTotal: Number(stats.regular_total),
-    nonRecurringTotal: Number(stats.non_recurring_total),
-    recurringCount: Number(stats.recurring_count),
-    houseCount: Number(stats.house_count),
-    parentsCount: Number(stats.parents_count),
-    gymCount: Number(stats.gym_count),
-    regularCount: Number(stats.regular_count),
-    nonRecurringCount: Number(stats.non_recurring_count),
+    totalAmount,
+    categoryStats,
     chartData,
   };
 }
@@ -164,12 +123,8 @@ export async function getExpenses(page: number, limit: number = 20, startDate?: 
     .order('created_at', { ascending: false })
     .range(from, to);
 
-  if (startDate) {
-    query = query.gte('date', startDate);
-  }
-  if (endDate) {
-    query = query.lte('date', endDate);
-  }
+  if (startDate) query = query.gte('date', startDate);
+  if (endDate)   query = query.lte('date', endDate);
 
   const { data, error } = await query;
 
