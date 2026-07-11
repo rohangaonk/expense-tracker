@@ -6,7 +6,6 @@ import {
   saveBulkExpensesAction,
   type ExpenseData,
 } from '../actions/expense';
-import { addToSyncQueue } from '../../lib/offline/sync';
 import Link from 'next/link';
 import VoiceButton from '../components/VoiceButton';
 import { useToast } from '../../components/ToastProvider';
@@ -198,7 +197,7 @@ export default function AddExpensePage() {
   // null = input step; array = review step
   const [items, setItems] = useState<(ParsedExpense & { _id: string })[] | null>(null);
 
-  const { showInfo, showError } = useToast();
+  const { showError } = useToast();
 
   // ---- Parsing ----
   const handleParse = useCallback(async () => {
@@ -267,16 +266,7 @@ export default function AddExpensePage() {
         time: it.time ?? null,
       }));
 
-      if (navigator.onLine) {
-        await saveBulkExpensesAction(expenseData);
-      } else {
-        for (const data of expenseData) {
-          await addToSyncQueue(data);
-        }
-        showInfo(`You are offline. ${expenseData.length} expense${expenseData.length > 1 ? 's' : ''} saved locally and will sync when online.`);
-        setItems(null);
-        setInputVal('');
-      }
+      await saveBulkExpensesAction(expenseData);
     } catch (err) {
       console.error(err);
       showError('Failed to save expenses. Please try again.');

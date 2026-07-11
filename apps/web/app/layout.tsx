@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@repo/ui/components/ui/toaster";
 import InstallPrompt from "./components/InstallPrompt";
-import { OfflineSyncProvider } from '../components/OfflineSyncProvider';
 import { ToastProvider } from '../components/ToastProvider';
 import { ConfirmDialogProvider } from '../components/ConfirmDialogProvider';
 import Script from 'next/script';
@@ -45,11 +44,9 @@ export default function RootLayout({
       >
         <ToastProvider>
           <ConfirmDialogProvider>
-            <OfflineSyncProvider>
-              {children}
-              <InstallPrompt />
-              <Toaster />
-            </OfflineSyncProvider>
+            {children}
+            <InstallPrompt />
+            <Toaster />
           </ConfirmDialogProvider>
         </ToastProvider>
         

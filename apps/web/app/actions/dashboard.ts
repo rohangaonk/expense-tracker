@@ -85,7 +85,7 @@ export async function getDashboardData(startDate?: string, endDate?: string): Pr
     throw new Error('Failed to fetch initial expenses');
   }
 
-  const categoryStats: CategoryStat[] = (statsResult.data || []).map((row: any) => ({
+  const categoryStats: CategoryStat[] = (statsResult.data || []).map((row: { category: string; total_amount: number; expense_count: number }) => ({
     category:      row.category,
     total_amount:  Number(row.total_amount),
     expense_count: Number(row.expense_count),

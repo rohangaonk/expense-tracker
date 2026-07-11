@@ -3,7 +3,6 @@ import { signout } from './auth/actions';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import PendingExpenses from './components/PendingExpenses';
 import SummaryCards from './components/SummaryCards';
 import PeriodSelector from './components/PeriodSelector';
 import ExpensesAnalysis from './components/ExpensesAnalysis';
@@ -81,8 +80,7 @@ export default async function Home({
           </div>
         </header>
 
-        {/* Pending Sync Alert */}
-        <PendingExpenses />
+
 
         {/* Period Selector */}
         <PeriodSelector />
