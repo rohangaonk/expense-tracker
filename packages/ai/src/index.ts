@@ -39,6 +39,8 @@ Category guidance (pick the BEST match — these are mutually exclusive):
 - Entertainment: movies, events, subscriptions (Netflix, F1 etc.), museum
 - Other: anything that doesn't clearly fit the above`;
 
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
+
 // Parse a single expense from natural language
 export async function parseExpense(text: string): Promise<ParsedExpense> {
   const today = new Date().toISOString().split('T')[0];
@@ -73,7 +75,7 @@ export async function parseExpense(text: string): Promise<ParsedExpense> {
           content: prompt,
         },
       ],
-      model: 'llama-3.3-70b-versatile',
+      model: GROQ_MODEL,
       temperature: 0.1,
       response_format: { type: 'json_object' },
     });
@@ -128,7 +130,7 @@ export async function parseExpenses(text: string): Promise<ParsedExpense[]> {
           content: prompt,
         },
       ],
-      model: 'llama-3.3-70b-versatile',
+      model: GROQ_MODEL,
       temperature: 0.1,
       response_format: { type: 'json_object' },
     });
