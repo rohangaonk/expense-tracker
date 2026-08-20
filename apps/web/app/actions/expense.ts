@@ -1,9 +1,11 @@
 'use server';
 
-import { parseExpense as aiParseExpense, parseExpenses as aiParseExpenses, ParsedExpense } from '@repo/ai';
+import { parseExpense as aiParseExpense, parseExpenses as aiParseExpenses, type ParsedExpense } from '@repo/ai';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+
+export type { ParsedExpense };
 
 export async function parseExpenseAction(text: string): Promise<ParsedExpense> {
   if (!text) {

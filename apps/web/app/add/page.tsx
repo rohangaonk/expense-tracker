@@ -5,11 +5,11 @@ import {
   parseExpensesAction,
   saveBulkExpensesAction,
   type ExpenseData,
+  type ParsedExpense,
 } from '../actions/expense';
 import Link from 'next/link';
 import VoiceButton from '../components/VoiceButton';
 import { useToast } from '../../components/ToastProvider';
-import { ParsedExpense } from '@repo/ai';
 
 import { EXPENSE_CATEGORIES } from '../../lib/categories';
 
