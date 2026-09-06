@@ -1,9 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { ChartData, CategoryStat } from '../actions/dashboard';
-import ExpensesPieChart from './ExpensesPieChart';
-import ExpensesBarChart from './ExpensesBarChart';
+
+const ExpensesPieChart = dynamic(() => import('./ExpensesPieChart'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[280px] flex items-center justify-center text-xs text-gray-400">
+      Loading chart…
+    </div>
+  ),
+});
+
+const ExpensesBarChart = dynamic(() => import('./ExpensesBarChart'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[240px] flex items-center justify-center text-xs text-gray-400">
+      Loading chart…
+    </div>
+  ),
+});
 
 interface ExpensesAnalysisProps {
   categoryStats: CategoryStat[];

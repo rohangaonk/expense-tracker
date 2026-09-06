@@ -1,6 +1,6 @@
 import { getDashboardData } from './actions/dashboard';
 import { signout } from './auth/actions';
-import { createClient } from '@/lib/supabase/server';
+import { getAuthenticatedUser } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import SummaryCards from './components/SummaryCards';
@@ -21,8 +21,7 @@ export default async function Home({
 }: {
   searchParams: { view?: string; date?: string; category?: string };
 }) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser();
 
   if (!user) {
     redirect('/login');
@@ -43,7 +42,12 @@ export default async function Home({
     dateRange = getMonthRange(selectedDate);
   }
 
-  const dashboardData = await getDashboardData(dateRange.start, dateRange.end, activeCategory || undefined);
+  const dashboardData = await getDashboardData(
+    dateRange.start, 
+    dateRange.end, 
+    activeCategory || undefined,
+    user.id
+  );
 
   if (!dashboardData) {
     redirect('/login');

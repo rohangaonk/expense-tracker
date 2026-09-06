@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { cache } from 'react'
 
 export function createClient() {
   const cookieStore = cookies()
@@ -34,3 +35,15 @@ export function createClient() {
     }
   )
 }
+
+/**
+ * Cached per-request user lookup.
+ * Calling this multiple times in the same server request lifecycle
+ * makes only ONE network call to Supabase Auth.
+ */
+export const getAuthenticatedUser = cache(async () => {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
+})
+

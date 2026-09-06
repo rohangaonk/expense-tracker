@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@repo/ui/components/ui/toaster";
-import InstallPrompt from "./components/InstallPrompt";
 import { ToastProvider } from '../components/ToastProvider';
 import { ConfirmDialogProvider } from '../components/ConfirmDialogProvider';
 import Script from 'next/script';
@@ -45,24 +44,25 @@ export default function RootLayout({
         <ToastProvider>
           <ConfirmDialogProvider>
             {children}
-            <InstallPrompt />
             <Toaster />
           </ConfirmDialogProvider>
         </ToastProvider>
         
-        {/* PWA Service Worker Registration */}
-        <Script id="pwa-register" strategy="afterInteractive">
+        {/* Clean up any legacy Service Worker registrations and caches */}
+        <Script id="pwa-cleanup" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
-              window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(
-                  function(registration) {
-                    console.log('[PWA] Service Worker registered:', registration.scope);
-                  },
-                  function(err) {
-                    console.error('[PWA] Service Worker registration failed:', err);
-                  }
-                );
+              navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (var r of registrations) {
+                  r.unregister();
+                }
+              });
+            }
+            if ('caches' in window) {
+              caches.keys().then(function(names) {
+                for (var name of names) {
+                  caches.delete(name);
+                }
               });
             }
           `}

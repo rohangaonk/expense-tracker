@@ -51,6 +51,7 @@ export default function ExpenseList({ initialExpenses, startDate, endDate, categ
   }, [page, loading, hasMore, startDate, endDate, category]);
 
   useEffect(() => {
+    const target = observerTarget.current;
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting && hasMore) {
@@ -60,13 +61,13 @@ export default function ExpenseList({ initialExpenses, startDate, endDate, categ
       { threshold: 0.1 }
     );
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    if (target) {
+      observer.observe(target);
     }
 
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (target) {
+        observer.unobserve(target);
       }
     };
   }, [loadMore, hasMore]);

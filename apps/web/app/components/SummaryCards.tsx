@@ -1,5 +1,6 @@
 'use client';
 
+import { useTransition } from 'react';
 import { CategoryStat } from '../actions/dashboard';
 import { getCategoryDetails } from '../../lib/categories';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
@@ -15,6 +16,7 @@ export default function SummaryCards({ total, totalCount, categoryStats, activeC
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
 
   const handleCategoryClick = (category: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -23,11 +25,13 @@ export default function SummaryCards({ total, totalCount, categoryStats, activeC
     } else {
       params.set('category', category);
     }
-    router.push(`${pathname}?${params.toString()}`);
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
   };
 
   return (
-    <div className="space-y-2 mb-4">
+    <div className={`space-y-2 mb-4 transition-opacity duration-150 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
       {/* Grand Total */}
       <div 
         onClick={() => activeCategory && handleCategoryClick(null)}

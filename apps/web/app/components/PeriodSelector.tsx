@@ -1,5 +1,6 @@
 'use client';
 
+import { useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   ViewMode, 
@@ -14,6 +15,7 @@ import {
 export default function PeriodSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
   
   const viewMode = (searchParams.get('view') as ViewMode) || 'month';
   const dateParam = searchParams.get('date');
@@ -33,7 +35,9 @@ export default function PeriodSelector() {
       params.set('date', formatDateForParam(newDate));
     }
     
-    router.push(`/?${params.toString()}`);
+    startTransition(() => {
+      router.push(`/?${params.toString()}`);
+    });
   };
 
   const handleViewChange = (mode: ViewMode) => {
@@ -53,7 +57,9 @@ export default function PeriodSelector() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 mb-4">
+    <div className={`bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 mb-4 transition-opacity duration-150 ${
+      isPending ? 'opacity-70' : 'opacity-100'
+    }`}>
       {/* Tab Selector */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex gap-2">

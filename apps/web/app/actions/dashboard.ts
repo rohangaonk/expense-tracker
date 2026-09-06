@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient, getAuthenticatedUser } from '@/lib/supabase/server';
 
 export interface Expense {
   id: string;
@@ -32,31 +32,37 @@ export interface DashboardData {
   chartData: ChartData[];
 }
 
-export async function getDashboardData(startDate?: string, endDate?: string, category?: string): Promise<DashboardData | null> {
+export async function getDashboardData(
+  startDate?: string, 
+  endDate?: string, 
+  category?: string,
+  userId?: string
+): Promise<DashboardData | null> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const currentUserId = userId || (await getAuthenticatedUser())?.id;
 
-  if (!user) {
+  if (!currentUserId) {
     return null;
   }
 
   const [statsResult, chartDataResult, initialExpensesResult] = await Promise.all([
     // Query 1: Per-category stats via RPC
     supabase.rpc('get_expense_stats', {
-      p_user_id: user.id,
+      p_user_id: currentUserId,
       p_start_date: startDate || null,
       p_end_date: endDate || null,
     }),
 
-    // Query 2: Chart data (query directly to allow category filtering)
+    // Query 2: Chart data (filter in SQL to minimize payload)
     (async () => {
       let query = supabase
         .from('expenses')
         .select('date, amount, category')
-        .eq('user_id', user.id);
+        .eq('user_id', currentUserId);
 
       if (startDate) query = query.gte('date', startDate);
       if (endDate)   query = query.lte('date', endDate);
+      if (category)  query = query.eq('category', category);
 
       return await query;
     })(),
@@ -66,7 +72,7 @@ export async function getDashboardData(startDate?: string, endDate?: string, cat
       let query = supabase
         .from('expenses')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUserId)
         .order('date', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(20);
@@ -101,8 +107,7 @@ export async function getDashboardData(startDate?: string, endDate?: string, cat
   const totalAmount = categoryStats.reduce((sum, s) => sum + s.total_amount, 0);
 
   const chartData: ChartData[] = (chartDataResult.data || [])
-    .filter((row: { date: string; amount: number; category: string }) => !category || row.category === category)
-    .map((row: { date: string; amount: number; category: string }) => ({
+    .map((row: { date: string; amount: number }) => ({
       date: row.date,
       amount: Number(row.amount),
     }));
@@ -117,7 +122,7 @@ export async function getDashboardData(startDate?: string, endDate?: string, cat
 
 export async function getExpenses(page: number, limit: number = 20, startDate?: string, endDate?: string, category?: string): Promise<Expense[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser();
 
   if (!user) return [];
 
